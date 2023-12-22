@@ -1,7 +1,7 @@
 using Godot;
 
-public partial class NoiseDemo2D : Sprite2D
-{
+public partial class NoiseGenerator {
+
 	FastNoiseLite noise = new FastNoiseLite();
 	int height = 10;
 	int width = 10;
@@ -19,11 +19,5 @@ public partial class NoiseDemo2D : Sprite2D
 		}
 
 		return noiseMap;
-	}
-
-	public override void _Ready() {
-		noise.NoiseType = FastNoiseLite.NoiseTypeEnum.Perlin;
-		float[,] noiseMap = Generate2DNoise(height, width, scale);
-		GD.Print($"{noiseMap[9,9]}");
 	}
 }
