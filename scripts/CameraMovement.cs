@@ -51,9 +51,6 @@ public partial class CameraMovement : Camera3D
 			float dir_y = Mathf.DegToRad(eventMouseMotion.Relative.X * MOUSE_SENSITIVITY * -1);
 
 			this.RotateX(dir_x);
-			Vector3 clampedLook = new Vector3(0, this.Rotation.Y, this.Rotation.Z);
-			clampedLook.X = Mathf.Clamp(this.Rotation.X, -90, 90);
-			this.RotationDegrees = clampedLook;
 			
 			this.RotateY(dir_y);
 		}
