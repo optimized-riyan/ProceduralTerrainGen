@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://oiivydx7vba8"]
+
+[ext_resource type="Script" path="res://scripts/NoiseDemo2D.cs" id="1_5ky2i"]
+
+[node name="Node2D" type="Node2D"]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(578, 323)
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(578, 323)
+script = ExtResource("1_5ky2i")
