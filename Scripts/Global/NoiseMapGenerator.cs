@@ -3,13 +3,18 @@ using Godot;
 namespace Global {
 	public class NoiseMapGenerator {
 
-		FastNoiseLite noise;
+		private FastNoiseLite noise;
+		private float LowerLimit;
+		private float UpperLimit;
+		
 
 
-		public NoiseMapGenerator(FastNoiseLite.NoiseTypeEnum noiseEnum) {
+		public NoiseMapGenerator(FastNoiseLite.NoiseTypeEnum noiseEnum, float LowerLimit, float UpperLimit) {
             noise = new FastNoiseLite {
                 NoiseType = noiseEnum
             };
+			this.LowerLimit = LowerLimit;
+			this.UpperLimit = UpperLimit;
         }
 
 
@@ -17,15 +22,21 @@ namespace Global {
             noise = new FastNoiseLite {
                 NoiseType = FastNoiseLite.NoiseTypeEnum.Perlin
             };
+			this.LowerLimit = 0F;
+			this.UpperLimit = 1F;
         }
 
 
 		public float[,] Generate2DNoiseMap(int height, int width, float offsetX, float offsetY, float scale) {
 			float [,] noiseMap = new float[height, width];
+			float noiseValue;
+			float k1 = (UpperLimit - LowerLimit)/2;
+			float k2 = (UpperLimit + LowerLimit)/2;
 
 			for (int x = 0; x < height; x++) {
 				for (int y = 0; y < width; y++) {
-					noiseMap[x,y] = noise.GetNoise2D((x+offsetX)/scale, (y+offsetY)/scale);
+					noiseValue = noise.GetNoise2D((x+offsetX)/scale, (y+offsetY)/scale);
+					noiseMap[x,y] = noiseValue*k1 + k2;
 				}
 			}
 

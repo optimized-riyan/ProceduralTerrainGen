@@ -27,7 +27,7 @@ public partial class Terrain : MeshInstance3D
 
 
 	private void generateTerrain() {
-		NoiseMapGenerator Noise = new NoiseMapGenerator(FastNoiseLite.NoiseTypeEnum.Perlin);
+		NoiseMapGenerator Noise = new NoiseMapGenerator(FastNoiseLite.NoiseTypeEnum.Perlin, 0F, 1F);
 		float [,] noiseMap = Noise.Generate2DNoiseMap(NoiseRows, NoiseColumns, NoiseScale);
 
 		Vector3[] vertices = new Vector3[(NoiseRows-1)*(NoiseColumns-1)*6];
