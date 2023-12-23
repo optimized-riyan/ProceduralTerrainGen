@@ -16,9 +16,33 @@ public partial class CameraMovement : Camera3D
 	}
 
 
+    public override void _Process(double delta) {
+        if (Input.IsActionJustPressed("ui_cancel")) {
+			if (Input.MouseMode == Input.MouseModeEnum.Captured)
+				Input.MouseMode = Input.MouseModeEnum.Visible;
+			else if (Input.MouseMode == Input.MouseModeEnum.Visible)
+				Input.MouseMode = Input.MouseModeEnum.Captured;
+		}
+    }
+
+
     public override void _PhysicsProcess(double delta) {
         handleMovement(delta);
     }
+
+
+    public override void _Input(InputEvent @event) {
+		if (@event is InputEventMouseMotion eventMouseMotion) {
+			float dir_x = Mathf.DegToRad(eventMouseMotion.Relative.Y * MOUSE_SENSITIVITY * -1);
+			float dir_y = Mathf.DegToRad(eventMouseMotion.Relative.X * MOUSE_SENSITIVITY * -1);
+
+			this.RotateX(dir_x);
+			float clampedX = Mathf.DegToRad(Mathf.Clamp(this.RotationDegrees.X, -90, 90));
+			this.Rotation = new Vector3(clampedX, this.Rotation.Y, this.Rotation.Z);
+			
+			this.RotateY(dir_y);
+		}
+	}
 
 
 	private void handleMovement(double delta) {
@@ -42,19 +66,5 @@ public partial class CameraMovement : Camera3D
 
 		dir = dir.Normalized();
 		this.Position += dir * MOVEMENT_SPEED * deltaF;
-	}
-
-
-    public override void _Input(InputEvent @event) {
-		if (@event is InputEventMouseMotion eventMouseMotion) {
-			float dir_x = Mathf.DegToRad(eventMouseMotion.Relative.Y * MOUSE_SENSITIVITY * -1);
-			float dir_y = Mathf.DegToRad(eventMouseMotion.Relative.X * MOUSE_SENSITIVITY * -1);
-
-			this.RotateX(dir_x);
-			float clampedX = Mathf.DegToRad(Mathf.Clamp(this.RotationDegrees.X, -90, 90));
-			this.Rotation = new Vector3(clampedX, this.Rotation.Y, this.Rotation.Z);
-			
-			this.RotateY(dir_y);
-		}
 	}
 }
