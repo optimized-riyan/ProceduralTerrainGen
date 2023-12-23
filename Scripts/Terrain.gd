@@ -1,7 +1,6 @@
 extends MeshInstance3D
 
 
-# Called when the node enters the scene tree for the first time.
 func _ready():
 	var vertices = PackedVector3Array()
 	vertices.push_back(Vector3(0, 1, 0))

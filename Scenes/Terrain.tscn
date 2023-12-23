@@ -1,0 +1,19 @@
+[gd_scene load_steps=5 format=3 uid="uid://clmbdy582usxt"]
+
+[ext_resource type="Script" path="res://Scripts/Terrain.cs" id="1_igie7"]
+[ext_resource type="Script" path="res://Scripts/CameraMovement.cs" id="2_6njss"]
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_bfngg"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_5o7ib"]
+
+[node name="Terrain" type="MeshInstance3D"]
+mesh = SubResource("ArrayMesh_bfngg")
+script = ExtResource("1_igie7")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.821119, 0.570756, 0, -0.570756, 0.821119, 0, 0.790393, 1.5275)
+script = ExtResource("2_6njss")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_5o7ib")

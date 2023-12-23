@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://oiivydx7vba8"]
 
-[ext_resource type="Script" path="res://scripts/NoiseDemo2D.cs" id="1_5ky2i"]
+[ext_resource type="Script" path="res://Scripts/NoiseDemo2D.cs" id="1_5ky2i"]
 
 [node name="Node2D" type="Node2D"]
 

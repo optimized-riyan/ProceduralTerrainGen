@@ -6,7 +6,7 @@ public partial class Terrain : MeshInstance3D
 
 	}
 
-	public override void _Process(double delta) {
-
+	private void generateTerrain() {
+		
 	}
 }
