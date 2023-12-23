@@ -1,6 +1,5 @@
 using Godot;
 using Global;
-using System.Data;
 
 
 [Tool]
@@ -32,9 +31,15 @@ public partial class Terrain : MeshInstance3D
 
 		Vector3[] vertices = new Vector3[(NoiseRows-1)*(NoiseColumns-1)*6];
 		int currentIndex = 0;
-		for (int x = 0; x < NoiseRows; x++) {
-			for (int z = 0; z < NoiseColumns; z++) {
+		for (int x = 0; x < NoiseRows-1; x++) {
+			for (int z = 0; z < NoiseColumns-1; z++) {
 				vertices[currentIndex++] = new Vector3(x*CellWidth, noiseMap[x,z]*HeightLimit, z*CellWidth);
+				vertices[currentIndex++] = new Vector3((x+1)*CellWidth, noiseMap[x+1,z+1]*HeightLimit, (z+1)*CellWidth);
+				vertices[currentIndex++] = new Vector3(x*CellWidth, noiseMap[x,z+1]*HeightLimit, (z+1)*CellWidth);
+
+				vertices[currentIndex++] = new Vector3(x*CellWidth, noiseMap[x,z]*HeightLimit, z*CellWidth);
+				vertices[currentIndex++] = new Vector3((x+1)*CellWidth, noiseMap[x+1,z]*HeightLimit, z*CellWidth);
+				vertices[currentIndex++] = new Vector3((x+1)*CellWidth, noiseMap[x+1,z+1]*HeightLimit, (z+1)*CellWidth);
 			}
 		}
 
