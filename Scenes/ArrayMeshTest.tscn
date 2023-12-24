@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dhk57l2x42qsd"]
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_q1fpk"]
+
+[node name="MeshInstance3D" type="MeshInstance3D"]
+mesh = SubResource("ArrayMesh_q1fpk")
