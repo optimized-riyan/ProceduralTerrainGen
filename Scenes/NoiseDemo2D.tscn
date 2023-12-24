@@ -1,6 +1,18 @@
-[gd_scene load_steps=2 format=3 uid="uid://oiivydx7vba8"]
+[gd_scene load_steps=5 format=3 uid="uid://oiivydx7vba8"]
 
 [ext_resource type="Script" path="res://Scripts/NoiseDemo2D.cs" id="1_5ky2i"]
+
+[sub_resource type="Gradient" id="Gradient_bqkwy"]
+interpolation_mode = 1
+offsets = PackedFloat32Array(0, 0.513967, 0.586592, 0.75419, 0.927374, 1)
+colors = PackedColorArray(0.223529, 0.203922, 0.839216, 1, 0.943, 1, 0.43, 1, 0.158739, 0.739056, 0.301554, 1, 0.0489833, 0.05, 0.0195, 1, 1, 1, 1, 1, 1, 1, 1, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_ybjff"]
+noise_type = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_5s38n"]
+color_ramp = SubResource("Gradient_bqkwy")
+noise = SubResource("FastNoiseLite_ybjff")
 
 [node name="Node2D" type="Node2D"]
 
@@ -9,4 +21,5 @@ position = Vector2(578, 323)
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(578, 323)
+texture = SubResource("NoiseTexture2D_5s38n")
 script = ExtResource("1_5ky2i")
