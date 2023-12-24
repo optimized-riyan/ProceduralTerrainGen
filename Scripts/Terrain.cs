@@ -31,8 +31,6 @@ public partial class Terrain : MeshInstance3D
 
 		Vector3[] vertices = new Vector3[(NoiseRows-1)*(NoiseColumns-1)*6];
 		int vertIndex = 0;
-		float lengthB2 = NoiseRows*CellWidth/2;
-		float widthB2 = NoiseColumns*CellWidth/2;
 
 		Vector2[] uvs = new Vector2[(NoiseRows-1)*(NoiseColumns-1)*6];
 		int uvIndex = 0;
@@ -40,27 +38,28 @@ public partial class Terrain : MeshInstance3D
 		Vector3[] normals = new Vector3[(NoiseRows-1)*(NoiseColumns-1)*6];
 		int normalIndex = 0;
 
-		for (int x = 0; x < NoiseRows-1; x++) {
-			for (int z = 0; z < NoiseColumns-1; z++) {
-				// triangle 1
-				vertices[vertIndex++] = new Vector3(x*CellWidth-lengthB2, noiseMap[x,z]*HeightLimit, z*CellWidth-widthB2);
-				vertices[vertIndex++] = new Vector3((x+1)*CellWidth-lengthB2, noiseMap[x+1,z+1]*HeightLimit, (z+1)*CellWidth-widthB2);
-				vertices[vertIndex++] = new Vector3(x*CellWidth-lengthB2, noiseMap[x,z+1]*HeightLimit, (z+1)*CellWidth-widthB2);
+		int[] indices = new int[(NoiseRows-1)*(NoiseColumns-1)*6];
+		int indiceIndex = 0;
 
-				// triangle 2
-				vertices[vertIndex++] = new Vector3(x*CellWidth-lengthB2, noiseMap[x,z]*HeightLimit, z*CellWidth-widthB2);
-				vertices[vertIndex++] = new Vector3((x+1)*CellWidth-lengthB2, noiseMap[x+1,z]*HeightLimit, z*CellWidth-widthB2);
-				vertices[vertIndex++] = new Vector3((x+1)*CellWidth-lengthB2, noiseMap[x+1,z+1]*HeightLimit, (z+1)*CellWidth-widthB2);
+		// adding vertices and their respective uvs
+		for (int x = 0; x < NoiseRows; x++) {
+			for (int z = 0; z < NoiseColumns; z++) {
+				vertices[vertIndex++] = new Vector3(x*CellWidth, noiseMap[x,z]*HeightLimit, z*CellWidth);
 
-				// uv of tri 1, using z as y
-				uvs[uvIndex++] = new Vector2(x/NoiseRows, z/NoiseColumns);
-				uvs[uvIndex++] = new Vector2((x+1)/NoiseRows, (z+1)/NoiseColumns);
-				uvs[uvIndex++] = new Vector2(x/NoiseRows, (z+1)/NoiseColumns);
+				uvs[uvIndex++] = new Vector2(((float)x)/NoiseRows, ((float)z)/NoiseColumns);
+			}
+		}
 
-				// uv of tri 2, again using z as y
-				uvs[uvIndex++] = new Vector2(x/NoiseRows, z/NoiseColumns);
-				uvs[uvIndex++] = new Vector2((x+1)/NoiseRows, z/NoiseColumns);
-				uvs[uvIndex++] = new Vector2((x+1)/NoiseRows, (z+1)/NoiseColumns);
+
+		for (int i = 0; i < NoiseRows-1; i++) {
+			for (int j = 0; j < NoiseColumns-1; j++) {
+				indices[indiceIndex++] = i + j*NoiseRows;
+				indices[indiceIndex++] = i + (j+1)*NoiseRows;
+				indices[indiceIndex++] = i+1 + (j+1)*NoiseRows;
+
+				indices[indiceIndex++] = i + j*NoiseRows;
+				indices[indiceIndex++] = i+1 + (j+1)*NoiseRows;
+				indices[indiceIndex++] = i+1 + j*NoiseRows;
 			}
 		}
 
@@ -69,6 +68,7 @@ public partial class Terrain : MeshInstance3D
 		array.Resize((int) Mesh.ArrayType.Max);
 		array[(int)Mesh.ArrayType.Vertex] = vertices;
 		array[(int)Mesh.ArrayType.TexUV] = uvs;
+		array[(int)Mesh.ArrayType.Index] = indices;
 
 		arrayMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, array);
 
