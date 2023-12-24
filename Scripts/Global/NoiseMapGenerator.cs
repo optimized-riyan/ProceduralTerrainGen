@@ -27,13 +27,13 @@ namespace Global {
         }
 
 
-		public float[,] Generate2DNoiseMap(int height, int width, float offsetX, float offsetY, float scale) {
-			float [,] noiseMap = new float[height, width];
+		public float[,] Generate2DNoiseMap(int length, int width, float offsetX, float offsetY, float scale) {
+			float [,] noiseMap = new float[length, width];
 			float noiseValue;
 			float k1 = (UpperLimit - LowerLimit)/2;
 			float k2 = (UpperLimit + LowerLimit)/2;
 
-			for (int x = 0; x < height; x++) {
+			for (int x = 0; x < length; x++) {
 				for (int y = 0; y < width; y++) {
 					noiseValue = noise.GetNoise2D((x+offsetX)/scale, (y+offsetY)/scale);
 					noiseMap[x,y] = noiseValue*k1 + k2;
@@ -43,12 +43,12 @@ namespace Global {
 			return noiseMap;
 		}
 
-		public float[,] Generate2DNoiseMap(int height, int width, float scale) {
-			return Generate2DNoiseMap(height, width, 0, 0, scale);
+		public float[,] Generate2DNoiseMap(int length, int width, float scale) {
+			return Generate2DNoiseMap(length, width, 0, 0, scale);
 		}
 
-		public float[,] Generate2DNoiseMap(int height, int width) {
-			return Generate2DNoiseMap(height, width, 0, 0, 0.1F);
+		public float[,] Generate2DNoiseMap(int length, int width) {
+			return Generate2DNoiseMap(length, width, 0, 0, 0.1F);
 		}
 	}
 }
