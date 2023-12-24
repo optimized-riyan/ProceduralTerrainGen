@@ -13,7 +13,7 @@ public partial class Terrain : MeshInstance3D
 	[Export]
 	private float NoiseScale = 0.1F;
 	[Export]
-	private bool AutoUpdate = false;
+	private bool Update = false;
 	[Export]
 	private float CellWidth = 1F;
 	[Export]
@@ -25,18 +25,26 @@ public partial class Terrain : MeshInstance3D
 	}
 
 
-	private void generateTerrain() {
+    public override void _Process(double delta) {
+        if (Update) {
+			generateTerrain();
+			Update = false;
+		}
+    }
+
+
+    private void generateTerrain() {
 		NoiseMapGenerator Noise = new NoiseMapGenerator(FastNoiseLite.NoiseTypeEnum.SimplexSmooth, 0F, 1F);
 		float [,] noiseMap = Noise.Generate2DNoiseMap(NoiseRows, NoiseColumns, NoiseScale);
 
-		Vector3[] vertices = new Vector3[(NoiseRows-1)*(NoiseColumns-1)*6];
+		Vector3[] vertices = new Vector3[NoiseRows*NoiseColumns];
 		int vertIndex = 0;
 
-		Vector2[] uvs = new Vector2[(NoiseRows-1)*(NoiseColumns-1)*6];
+		Vector2[] uvs = new Vector2[NoiseRows*NoiseColumns];
 		int uvIndex = 0;
 
-		Vector3[] normals = new Vector3[(NoiseRows-1)*(NoiseColumns-1)*6];
-		int normalIndex = 0;
+		// Vector3[] normals = new Vector3[(NoiseRows-1)*(NoiseColumns-1)*6];
+		// int normalIndex = 0;
 
 		int[] indices = new int[(NoiseRows-1)*(NoiseColumns-1)*6];
 		int indiceIndex = 0;
@@ -45,11 +53,9 @@ public partial class Terrain : MeshInstance3D
 		for (int x = 0; x < NoiseRows; x++) {
 			for (int z = 0; z < NoiseColumns; z++) {
 				vertices[vertIndex++] = new Vector3(x*CellWidth, noiseMap[x,z]*HeightLimit, z*CellWidth);
-
 				uvs[uvIndex++] = new Vector2(((float)x)/NoiseRows, ((float)z)/NoiseColumns);
 			}
 		}
-
 
 		for (int i = 0; i < NoiseRows-1; i++) {
 			for (int j = 0; j < NoiseColumns-1; j++) {
@@ -73,5 +79,6 @@ public partial class Terrain : MeshInstance3D
 		arrayMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, array);
 
 		this.Mesh = arrayMesh;
+		GD.Print(indiceIndex);
 	}
 }
