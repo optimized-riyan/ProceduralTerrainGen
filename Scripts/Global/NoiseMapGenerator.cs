@@ -3,7 +3,7 @@ using Godot;
 namespace Global {
 	public class NoiseMapGenerator {
 
-		private FastNoiseLite noise;
+		public FastNoiseLite noise;
 		private float LowerLimit;
 		private float UpperLimit;
 		

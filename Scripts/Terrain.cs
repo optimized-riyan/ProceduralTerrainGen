@@ -18,24 +18,35 @@ public partial class Terrain : MeshInstance3D
 	private float CellWidth = 1F;
 	[Export]
 	private float HeightLimit = 10F;
+	[Export]
+	private int NoiseSeed = 0;
+
+	private NoiseMapGenerator NMG = new NoiseMapGenerator(FastNoiseLite.NoiseTypeEnum.Perlin, 0F, 1F);
 
 
 	public override void _Ready() {
+		// setting specific noise parameters
+		NMG.noise.FractalType = FastNoiseLite.FractalTypeEnum.Fbm;
+		NMG.noise.Seed = NoiseSeed;
+		NMG.noise.FractalGain = 0.5F;
+		NMG.noise.FractalLacunarity = 2F;
+		NMG.noise.FractalOctaves = 4;
+
+
 		generateTerrain();
 	}
 
 
     public override void _Process(double delta) {
         if (Update) {
-			generateTerrain();
 			Update = false;
+			generateTerrain();
 		}
     }
 
 
     private void generateTerrain() {
-		NoiseMapGenerator Noise = new NoiseMapGenerator(FastNoiseLite.NoiseTypeEnum.SimplexSmooth, 0F, 1F);
-		float [,] noiseMap = Noise.Generate2DNoiseMap(NoiseRows, NoiseColumns, NoiseScale);
+		float [,] noiseMap = NMG.Generate2DNoiseMap(NoiseRows, NoiseColumns, NoiseScale);
 
 		Vector3[] vertices = new Vector3[NoiseRows*NoiseColumns];
 		int vertIndex = 0;
@@ -79,5 +90,11 @@ public partial class Terrain : MeshInstance3D
 		arrayMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, array);
 
 		this.Mesh = arrayMesh;
+	}
+
+
+	private void generateTexture() {
+		float [,] noiseMap = NMG.Generate2DNoiseMap(NoiseRows, NoiseColumns, NoiseScale);
+		
 	}
 }
