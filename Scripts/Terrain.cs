@@ -32,8 +32,8 @@ public partial class Terrain : MeshInstance3D
 		NMG.noise.FractalLacunarity = 2F;
 		NMG.noise.FractalOctaves = 4;
 
-
 		generateTerrain();
+		generateTexture();
 	}
 
 
@@ -41,6 +41,7 @@ public partial class Terrain : MeshInstance3D
         if (Update) {
 			Update = false;
 			generateTerrain();
+			generateTexture();
 		}
     }
 
@@ -96,5 +97,12 @@ public partial class Terrain : MeshInstance3D
 	private void generateTexture() {
 		float [,] noiseMap = NMG.Generate2DNoiseMap(NoiseRows, NoiseColumns, NoiseScale);
 		
+		NoiseTexture2D texture = new NoiseTexture2D();
+		StandardMaterial3D material = new StandardMaterial3D();
+
+		texture.Noise = NMG.noise;
+		material.AlbedoTexture = texture;
+
+		this.MaterialOverride = material;
 	}
 }
