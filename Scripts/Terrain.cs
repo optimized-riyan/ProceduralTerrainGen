@@ -35,7 +35,7 @@ public partial class Terrain : MeshInstance3D
 
     private void generateTerrain() {
 		NoiseMapGenerator Noise = new NoiseMapGenerator(FastNoiseLite.NoiseTypeEnum.SimplexSmooth, 0F, 1F);
-		float [,] noiseMap = Noise.Generate2DNoiseMap(NoiseColumns, NoiseRows, NoiseScale);
+		float [,] noiseMap = Noise.Generate2DNoiseMap(NoiseRows, NoiseColumns, NoiseScale);
 
 		Vector3[] vertices = new Vector3[NoiseRows*NoiseColumns];
 		int vertIndex = 0;
@@ -50,23 +50,22 @@ public partial class Terrain : MeshInstance3D
 		int indiceIndex = 0;
 
 		// adding vertices and their respective uvs
-		for (int x = 0; x < NoiseColumns; x++) {
-			for (int z = 0; z < NoiseRows; z++) {
+		for (int x = 0; x < NoiseRows; x++) {
+			for (int z = 0; z < NoiseColumns; z++) {
 				vertices[vertIndex++] = new Vector3(x*CellWidth, noiseMap[x,z]*HeightLimit, z*CellWidth);
-				uvs[uvIndex++] = new Vector2(((float)x)/NoiseColumns, ((float)z)/NoiseRows);
+				uvs[uvIndex++] = new Vector2(((float)x)/NoiseRows, ((float)z)/NoiseColumns);
 			}
 		}
 
-		// z is the i!
-		for (int j = 0; j < NoiseRows-1; j++) {
-			for (int i = 0; i < NoiseColumns-1; i++) {
-				indices[indiceIndex++] = i + j*NoiseRows;
-				indices[indiceIndex++] = i+1 + j*NoiseRows;
-				indices[indiceIndex++] = i+1 + (j+1)*NoiseRows;
+		for (int i = 0; i < NoiseColumns-1; i++) {
+			for (int j = 0; j < NoiseRows-1; j++) {
+				indices[indiceIndex++] = i + j*NoiseColumns;
+				indices[indiceIndex++] = i+1 + (j+1)*NoiseColumns;
+				indices[indiceIndex++] = i+1 + j*NoiseColumns;
 
-				indices[indiceIndex++] = i + j*NoiseRows;
-				indices[indiceIndex++] = i+1 + (j+1)*NoiseRows;
-				indices[indiceIndex++] = i + (j+1)*NoiseRows;
+				indices[indiceIndex++] = i + j*NoiseColumns;
+				indices[indiceIndex++] = i + (j+1)*NoiseColumns;
+				indices[indiceIndex++] = i+1 + (j+1)*NoiseColumns;
 			}
 		}
 
@@ -80,6 +79,5 @@ public partial class Terrain : MeshInstance3D
 		arrayMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, array);
 
 		this.Mesh = arrayMesh;
-		GD.Print(indiceIndex);
 	}
 }
