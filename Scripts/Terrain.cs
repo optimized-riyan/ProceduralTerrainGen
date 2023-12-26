@@ -108,7 +108,7 @@ public partial class Terrain : MeshInstance3D
 
 		for (int i = 0; i < NoiseRows; i++) {
 			for (int j = 0; j < NoiseColumns; j++) {
-				imageData[i*NoiseColumns + j] = (byte)Mathf.Lerp(0, 255, noiseMap[i,j]);
+				imageData[i + j*NoiseRows] = (byte)Mathf.Lerp(0, 255, noiseMap[i,j]);
 			}
 		}
 		img.SetData(NoiseRows, NoiseColumns, false, Image.Format.L8, imageData);
