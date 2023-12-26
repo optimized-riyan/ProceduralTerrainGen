@@ -7,11 +7,11 @@ public partial class Terrain : MeshInstance3D
 {
 
 	[ExportGroup("Terrain Parameters")]
-	[Export]
+	[Export(PropertyHint.Range, "2,256,")]
 	private int NoiseRows = 128;
-	[Export]
+	[Export(PropertyHint.Range, "2,256,")]
 	private int NoiseColumns = 128;
-	[Export]
+	[Export(PropertyHint.Range, "0,1,or_greater")]
 	private float NoiseScale = 0.35F;
 	[Export]
 	private float CellWidth = 4F;
@@ -21,6 +21,8 @@ public partial class Terrain : MeshInstance3D
 	private int NoiseSeed = 0;
 	[Export]
 	private Curve HeightMask;
+	[Export]
+	private Gradient ColorMask;
 	[Export]
 	private bool Update = false;
 
@@ -114,18 +116,21 @@ public partial class Terrain : MeshInstance3D
 
 	private void generateTexture() {
 		Image img = new Image();
-		byte[] imageData = new byte[NoiseRows*NoiseColumns];
+		byte[] imageData = new byte[NoiseRows*NoiseColumns*3];
+		Color sampledPoint;
 
 		for (int i = 0; i < NoiseRows; i++) {
 			for (int j = 0; j < NoiseColumns; j++) {
-				imageData[i + j*NoiseRows] = (byte)Mathf.Lerp(0, 255, noiseMap[i,j]);
+				sampledPoint = ColorMask.Sample(noiseMap[i,j]);
+				imageData[(i + j*NoiseRows)*3] = (byte)sampledPoint.R8;
+				imageData[(i + j*NoiseRows)*3 + 1] = (byte)sampledPoint.G8;
+				imageData[(i + j*NoiseRows)*3 + 2] = (byte)sampledPoint.B8;
 			}
 		}
-		img.SetData(NoiseRows, NoiseColumns, false, Image.Format.L8, imageData);
+		img.SetData(NoiseRows, NoiseColumns, false, Image.Format.Rgb8, imageData);
 		
 		Texture2D texture = ImageTexture.CreateFromImage(img);
-		StandardMaterial3D material = new StandardMaterial3D();
-		material.AlbedoTexture = texture;
-		this.MaterialOverride = material;
+        StandardMaterial3D material = new StandardMaterial3D { AlbedoTexture = texture };
+        this.MaterialOverride = material;
 	}
 }
