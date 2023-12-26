@@ -22,6 +22,7 @@ public partial class Terrain : MeshInstance3D
 	private int NoiseSeed = 0;
 
 	private NoiseMapGenerator NMG = new NoiseMapGenerator(FastNoiseLite.NoiseTypeEnum.Perlin, 0F, 1F);
+	private float[,] noiseMap;
 
 
 	public override void _Ready() {
@@ -31,7 +32,9 @@ public partial class Terrain : MeshInstance3D
 		NMG.noise.FractalGain = 0.5F;
 		NMG.noise.FractalLacunarity = 2F;
 		NMG.noise.FractalOctaves = 4;
+		NMG.noise.Frequency = 0.01F;
 
+		regenerateNoiseMap();
 		generateTerrain();
 		generateTexture();
 	}
@@ -40,14 +43,19 @@ public partial class Terrain : MeshInstance3D
     public override void _Process(double delta) {
         if (Update) {
 			Update = false;
+			regenerateNoiseMap();
 			generateTerrain();
 			generateTexture();
 		}
     }
 
 
+	private void regenerateNoiseMap() {
+		noiseMap = NMG.Generate2DNoiseMap(NoiseRows, NoiseColumns, NoiseScale);
+	}
+
+
     private void generateTerrain() {
-		float [,] noiseMap = NMG.Generate2DNoiseMap(NoiseRows, NoiseColumns, NoiseScale);
 
 		Vector3[] vertices = new Vector3[NoiseRows*NoiseColumns];
 		int vertIndex = 0;
@@ -95,14 +103,19 @@ public partial class Terrain : MeshInstance3D
 
 
 	private void generateTexture() {
-		float [,] noiseMap = NMG.Generate2DNoiseMap(NoiseRows, NoiseColumns, NoiseScale);
+		Image img = new Image();
+		byte[] imageData = new byte[NoiseRows*NoiseColumns];
+
+		for (int i = 0; i < NoiseRows; i++) {
+			for (int j = 0; j < NoiseColumns; j++) {
+				imageData[i*NoiseColumns + j] = (byte)Mathf.Lerp(0, 255, noiseMap[i,j]);
+			}
+		}
+		img.SetData(NoiseRows, NoiseColumns, false, Image.Format.L8, imageData);
 		
-		NoiseTexture2D texture = new NoiseTexture2D();
+		Texture2D texture = ImageTexture.CreateFromImage(img);
 		StandardMaterial3D material = new StandardMaterial3D();
-
-		texture.Noise = NMG.noise;
 		material.AlbedoTexture = texture;
-
 		this.MaterialOverride = material;
 	}
 }
