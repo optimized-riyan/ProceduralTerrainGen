@@ -20,6 +20,8 @@ public partial class Terrain : MeshInstance3D
 	[Export]
 	private int NoiseSeed = 0;
 	[Export]
+	private Curve HeightMask;
+	[Export]
 	private bool Update = false;
 
 	private NoiseMapGenerator NMG = new NoiseMapGenerator(FastNoiseLite.NoiseTypeEnum.Perlin, 0F, 1F);
@@ -35,6 +37,7 @@ public partial class Terrain : MeshInstance3D
 		NMG.noise.FractalOctaves = 4;
 		NMG.noise.Frequency = 0.01F;
 
+		updateParameters();
 		regenerateNoiseMap();
 		generateTerrain();
 		generateTexture();
@@ -44,6 +47,7 @@ public partial class Terrain : MeshInstance3D
     public override void _Process(double delta) {
         if (Update) {
 			Update = false;
+			updateParameters();
 			regenerateNoiseMap();
 			generateTerrain();
 			generateTexture();
@@ -53,6 +57,11 @@ public partial class Terrain : MeshInstance3D
 
 	private void regenerateNoiseMap() {
 		noiseMap = NMG.Generate2DNoiseMap(NoiseRows, NoiseColumns, NoiseScale);
+	}
+
+
+	private void updateParameters() {
+		NMG.HeightMask = this.HeightMask;
 	}
 
 

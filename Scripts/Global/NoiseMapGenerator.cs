@@ -4,9 +4,9 @@ namespace Global {
 	public class NoiseMapGenerator {
 
 		public FastNoiseLite noise;
+		public Curve HeightMask;
 		private float LowerLimit;
 		private float UpperLimit;
-		
 
 
 		public NoiseMapGenerator(FastNoiseLite.NoiseTypeEnum noiseEnum, float LowerLimit, float UpperLimit) {
@@ -36,7 +36,10 @@ namespace Global {
 			for (int x = 0; x < length; x++) {
 				for (int y = 0; y < width; y++) {
 					noiseValue = noise.GetNoise2D((x+offsetX)/scale, (y+offsetY)/scale);
-					noiseMap[x,y] = noiseValue*k1 + k2;
+					if (HeightMask != null)
+						noiseMap[x,y] = HeightMask.SampleBaked(noiseValue*k1 + k2);
+					else
+						noiseMap[x,y] = noiseValue*k1 + k2;
 				}
 			}
 
