@@ -6,20 +6,21 @@ using Global;
 public partial class Terrain : MeshInstance3D
 {
 
+	[ExportGroup("Terrain Parameters")]
 	[Export]
-	private int NoiseRows = 10;
+	private int NoiseRows = 128;
 	[Export]
-	private int NoiseColumns = 10;
+	private int NoiseColumns = 128;
 	[Export]
-	private float NoiseScale = 0.1F;
+	private float NoiseScale = 0.35F;
 	[Export]
-	private bool Update = false;
+	private float CellWidth = 4F;
 	[Export]
-	private float CellWidth = 1F;
-	[Export]
-	private float HeightLimit = 10F;
+	private float HeightLimit = 100F;
 	[Export]
 	private int NoiseSeed = 0;
+	[Export]
+	private bool Update = false;
 
 	private NoiseMapGenerator NMG = new NoiseMapGenerator(FastNoiseLite.NoiseTypeEnum.Perlin, 0F, 1F);
 	private float[,] noiseMap;
