@@ -130,7 +130,10 @@ public partial class Terrain : MeshInstance3D
 		img.SetData(NoiseRows, NoiseColumns, false, Image.Format.Rgb8, imageData);
 		
 		Texture2D texture = ImageTexture.CreateFromImage(img);
-        StandardMaterial3D material = new StandardMaterial3D { AlbedoTexture = texture };
+        StandardMaterial3D material = new StandardMaterial3D { 
+			AlbedoTexture = texture,
+			TextureFilter = BaseMaterial3D.TextureFilterEnum.Nearest
+		};
         this.MaterialOverride = material;
 	}
 }
