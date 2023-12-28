@@ -1,10 +1,9 @@
-using System.Reflection.Metadata.Ecma335;
 using Godot;
 
 namespace Global {
 	public class NoiseMapGenerator {
 
-		public FastNoiseLite noise;
+		private FastNoiseLite noise;
 		public Curve HeightMask;
 		private float LowerLimit;
 		private float UpperLimit;
@@ -12,10 +11,8 @@ namespace Global {
 		private float k2;
 
 
-		public NoiseMapGenerator(FastNoiseLite.NoiseTypeEnum noiseEnum, float LowerLimit, float UpperLimit) {
-            noise = new FastNoiseLite {
-                NoiseType = noiseEnum
-            };
+		public NoiseMapGenerator(FastNoiseLite noise, float LowerLimit, float UpperLimit) {
+			this.noise = noise;
 			this.LowerLimit = LowerLimit;
 			this.UpperLimit = UpperLimit;
 			this.k1 = (UpperLimit - LowerLimit)/2;
@@ -34,6 +31,15 @@ namespace Global {
         }
 
 
+		public NoiseMapGenerator(FastNoiseLite noise) {
+			this.noise = noise;
+			this.LowerLimit = 0F;
+			this.UpperLimit = 1F;
+			this.k1 = (UpperLimit - LowerLimit)/2;
+			this.k2 = (UpperLimit + LowerLimit)/2;
+		}
+
+
 		public float[,] Generate2DNoiseMap(int length, int width, float offsetX, float offsetY, float scale) {
 			float [,] noiseMap = new float[length, width];
 			float noiseValue;
@@ -41,10 +47,12 @@ namespace Global {
 			for (int x = 0; x < length; x++) {
 				for (int y = 0; y < width; y++) {
 					noiseValue = noise.GetNoise2D((x+offsetX)/scale, (y+offsetY)/scale);
+					float remappedNoiseVal = noiseValue*k1 + k2;
 					if (HeightMask != null)
-						noiseMap[x,y] = HeightMask.SampleBaked(noiseValue*k1 + k2);
+						// noiseMap[x,y] = Mathf.Min(HeightMask.SampleBaked(remappedNoiseVal), remappedNoiseVal);
+						noiseMap[x,y] = HeightMask.SampleBaked(remappedNoiseVal);
 					else
-						noiseMap[x,y] = noiseValue*k1 + k2;
+						noiseMap[x,y] = remappedNoiseVal;
 				}
 			}
 

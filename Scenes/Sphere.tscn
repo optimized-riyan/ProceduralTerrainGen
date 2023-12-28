@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://bei2idnvfiqc2"]
 
 [ext_resource type="Script" path="res://Scripts/Sphere.cs" id="1_70yqb"]
-[ext_resource type="Texture2D" uid="uid://clr2adlwuxier" path="res://icon.svg" id="1_sv11n"]
+[ext_resource type="Texture2D" uid="uid://clr2adlwuxier" path="res://Resources/icon.svg" id="1_sv11n"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5cdig"]
 albedo_texture = ExtResource("1_sv11n")
