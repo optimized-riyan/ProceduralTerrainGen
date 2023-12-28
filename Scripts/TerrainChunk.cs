@@ -6,7 +6,6 @@ using Global;
 public partial class TerrainChunk : MeshInstance3D {
 
 	[ExportGroup("Terrain Parameters")]
-	[Export(PropertyHint.Range, "2,256,")]
 	private int NoiseRows = 181;
 	private int NoiseColumns = 181;
 	[Export(PropertyHint.Range, "0,1,or_greater")]
@@ -28,7 +27,7 @@ public partial class TerrainChunk : MeshInstance3D {
 	private Vector2 chunkCoordinate;
 	[Export]
 	public int lodIndex = 0;
-	private int[] lodStepsSizes = new int[]{1, 4, 8, 12, 24, 48};
+	private int[] lodStepsSizes = new int[]{1, 4, 8, 12, 18, 30};
 	[Export]
 	private bool Update = false;
 
@@ -70,6 +69,7 @@ public partial class TerrainChunk : MeshInstance3D {
 		NMG.HeightMask = this.HeightMask;
 		// for lod calcs, both are same from this point on
 		NoiseColumns = NoiseRows;
+		lodIndex = Mathf.Min(lodIndex, lodStepsSizes.Length-1);
 	}
 
 
@@ -82,7 +82,7 @@ public partial class TerrainChunk : MeshInstance3D {
 
 		int lodStepsSize = lodStepsSizes[lodIndex];
 		int pointsOnLine = (NoiseRows-1)/lodStepsSize + 1;
-		int totalPointsOnGrid = (int)Mathf.Pow((NoiseRows-1)/lodStepsSize + 1, 2);
+		int totalPointsOnGrid = pointsOnLine*pointsOnLine;
 		Vector3[] vertices = new Vector3[totalPointsOnGrid];
 		int vertIndex = 0;
 
@@ -91,8 +91,9 @@ public partial class TerrainChunk : MeshInstance3D {
 
 		Vector3[] normals = new Vector3[totalPointsOnGrid];
 
-		GD.Print($"{lodStepsSize} {totalPointsOnGrid} {NoiseRows-1}");
-		int[] indices = new int[6*lodStepsSize*(lodStepsSize*(totalPointsOnGrid-1)-2*lodStepsSize*(NoiseRows-1))];
+		// GD.Print($"{lodStepsSize} {totalPointsOnGrid} {NoiseRows-1}");
+		GD.Print((NoiseRows-1)/lodStepsSize + 1);
+		int[] indices = new int[6*(pointsOnLine-1)*(pointsOnLine-1)];
 		int indiceIndex = 0;
 
 		// adding vertices and their respective uvs
