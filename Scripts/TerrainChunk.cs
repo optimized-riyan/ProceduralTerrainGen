@@ -91,6 +91,7 @@ public partial class TerrainChunk : MeshInstance3D {
 
 		Vector3[] normals = new Vector3[totalPointsOnGrid];
 
+		GD.Print($"{lodStepsSize} {totalPointsOnGrid} {NoiseRows-1}");
 		int[] indices = new int[6*lodStepsSize*(lodStepsSize*(totalPointsOnGrid-1)-2*lodStepsSize*(NoiseRows-1))];
 		int indiceIndex = 0;
 
@@ -131,67 +132,67 @@ public partial class TerrainChunk : MeshInstance3D {
 			}
 		}
 
-		// edge vertices' normals
-		Vector3[] top = new Vector3[pointsOnLine];
-		Vector3[] bottom = new Vector3[pointsOnLine];
-		Vector3[] left = new Vector3[pointsOnLine];
-		Vector3[] right = new Vector3[pointsOnLine];
+		// // edge vertices' normals
+		// Vector3[] top = new Vector3[pointsOnLine];
+		// Vector3[] bottom = new Vector3[pointsOnLine];
+		// Vector3[] left = new Vector3[pointsOnLine];
+		// Vector3[] right = new Vector3[pointsOnLine];
 
-		for (int j = 0; j < NoiseRows; j += lodStepsSize) {
-			top[j/lodStepsSize] = new Vector3(j*CellWidth, NMG.GetNoiseAt(-lodStepsSize, j, NoiseScale)*HeightLimit, -lodStepsSize*CellWidth);
-			bottom[j/lodStepsSize] = new Vector3(j*CellWidth, NMG.GetNoiseAt(NoiseColumns-1+lodStepsSize, j, NoiseScale)*HeightLimit, (NoiseColumns-1+lodStepsSize)*CellWidth);
-		}
-		for (int i = 0; i < NoiseColumns; i += lodStepsSize) {
-			left[i/lodStepsSize] = new Vector3(-lodStepsSize*CellWidth, NMG.GetNoiseAt(i, -lodStepsSize, NoiseScale)*HeightLimit, i*CellWidth);
-			right[i/lodStepsSize] = new Vector3((NoiseRows-1+lodStepsSize)*CellWidth, NMG.GetNoiseAt(i, NoiseRows-1+lodStepsSize, NoiseScale), i*CellWidth);
-		}
+		// for (int j = 0; j < NoiseRows; j += lodStepsSize) {
+		// 	top[j/lodStepsSize] = new Vector3(j*CellWidth, NMG.GetNoiseAt(-lodStepsSize, j, NoiseScale)*HeightLimit, -lodStepsSize*CellWidth);
+		// 	bottom[j/lodStepsSize] = new Vector3(j*CellWidth, NMG.GetNoiseAt(NoiseColumns-1+lodStepsSize, j, NoiseScale)*HeightLimit, (NoiseColumns-1+lodStepsSize)*CellWidth);
+		// }
+		// for (int i = 0; i < NoiseColumns; i += lodStepsSize) {
+		// 	left[i/lodStepsSize] = new Vector3(-lodStepsSize*CellWidth, NMG.GetNoiseAt(i, -lodStepsSize, NoiseScale)*HeightLimit, i*CellWidth);
+		// 	right[i/lodStepsSize] = new Vector3((NoiseRows-1+lodStepsSize)*CellWidth, NMG.GetNoiseAt(i, NoiseRows-1+lodStepsSize, NoiseScale), i*CellWidth);
+		// }
 
-		// top right and bottom left can be ignored since both won't be used
-		Vector3 topLeft, bottomRight;
-		topLeft = new Vector3(-lodStepsSize*CellWidth, NMG.GetNoiseAt(-1, -1, NoiseScale)*HeightLimit, -lodStepsSize*CellWidth);
-		bottomRight = new Vector3((NoiseColumns-1+lodStepsSize)*CellWidth, NMG.GetNoiseAt(NoiseColumns, NoiseRows, NoiseScale)*HeightLimit, (NoiseRows-1+lodStepsSize)*CellWidth);
+		// // top right and bottom left can be ignored since both won't be used
+		// Vector3 topLeft, bottomRight;
+		// topLeft = new Vector3(-lodStepsSize*CellWidth, NMG.GetNoiseAt(-1, -1, NoiseScale)*HeightLimit, -lodStepsSize*CellWidth);
+		// bottomRight = new Vector3((NoiseColumns-1+lodStepsSize)*CellWidth, NMG.GetNoiseAt(NoiseColumns, NoiseRows, NoiseScale)*HeightLimit, (NoiseRows-1+lodStepsSize)*CellWidth);
 
-		// top and bottom
-		for (int j = 0; j < NoiseRows-1; j += lodStepsSize) {
-			triSurfaceNormal = calculateSurfaceNormal(top[j/lodStepsSize], vertices[j*NoiseColumns], vertices[(j+1)*NoiseColumns]);
-			normals[j*NoiseColumns] += triSurfaceNormal;
-			normals[(j+1)*NoiseColumns] += triSurfaceNormal;
-			triSurfaceNormal = calculateSurfaceNormal(top[j/lodStepsSize], vertices[(j+1)*NoiseColumns], top[(j+1)/lodStepsSize]);
-			normals[(j+1)*NoiseColumns] += triSurfaceNormal;
+		// // top and bottom
+		// for (int j = 0; j < NoiseRows-1; j += lodStepsSize) {
+		// 	triSurfaceNormal = calculateSurfaceNormal(top[j/lodStepsSize], vertices[j*pointsOnLine], vertices[(j+1)*pointsOnLine]);
+		// 	normals[j*pointsOnLine] += triSurfaceNormal;
+		// 	normals[(j+1)*pointsOnLine] += triSurfaceNormal;
+		// 	triSurfaceNormal = calculateSurfaceNormal(top[j/lodStepsSize], vertices[(j+1)*pointsOnLine], top[(j+1)/lodStepsSize]);
+		// 	normals[(j+1)*pointsOnLine] += triSurfaceNormal;
 
-			triSurfaceNormal = calculateSurfaceNormal(vertices[NoiseColumns-1 + j*NoiseColumns], bottom[(j+1)/lodStepsSize], vertices[NoiseColumns-1 + (j+1)*NoiseColumns]);
-			normals[NoiseColumns-1 + j*NoiseColumns] += triSurfaceNormal;
-			normals[NoiseColumns-1 + (j+1)*NoiseColumns] += triSurfaceNormal;
-			triSurfaceNormal = calculateSurfaceNormal(vertices[NoiseColumns-1 + j*NoiseColumns], bottom[j/lodStepsSize], bottom[(j+1)/lodStepsSize]);
-			normals[NoiseColumns-1 + j*NoiseColumns] += triSurfaceNormal;
-		}
+		// 	triSurfaceNormal = calculateSurfaceNormal(vertices[pointsOnLine-1 + j*pointsOnLine], bottom[(j+1)/lodStepsSize], vertices[pointsOnLine-1 + (j+1)*pointsOnLine]);
+		// 	normals[pointsOnLine-1 + j*pointsOnLine] += triSurfaceNormal;
+		// 	normals[pointsOnLine-1 + (j+1)*pointsOnLine] += triSurfaceNormal;
+		// 	triSurfaceNormal = calculateSurfaceNormal(vertices[pointsOnLine-1 + j*pointsOnLine], bottom[j/lodStepsSize], bottom[(j+1)/lodStepsSize]);
+		// 	normals[pointsOnLine-1 + j*pointsOnLine] += triSurfaceNormal;
+		// }
 
-		// left and right
-		for (int i = 0; i < NoiseColumns-1; i += lodStepsSize) {
-			triSurfaceNormal = calculateSurfaceNormal(left[i/lodStepsSize], vertices[i+1], vertices[i]);
-			normals[i+1] += triSurfaceNormal;
-			normals[i] += triSurfaceNormal;
-			triSurfaceNormal = calculateSurfaceNormal(left[i/lodStepsSize], left[i+1], vertices[i+1]);
-			normals[i+1] += triSurfaceNormal;
+		// // left and right
+		// for (int i = 0; i < NoiseColumns-1; i += lodStepsSize) {
+		// 	triSurfaceNormal = calculateSurfaceNormal(left[i/lodStepsSize], vertices[i+1], vertices[i]);
+		// 	normals[i+1] += triSurfaceNormal;
+		// 	normals[i] += triSurfaceNormal;
+		// 	triSurfaceNormal = calculateSurfaceNormal(left[i/lodStepsSize], left[i+1], vertices[i+1]);
+		// 	normals[i+1] += triSurfaceNormal;
 
-			triSurfaceNormal = calculateSurfaceNormal(vertices[i + (NoiseRows-1)*NoiseColumns], vertices[i+1 + (NoiseRows-1)*NoiseColumns], right[(i+1)/lodStepsSize]);
-			normals[i + (NoiseRows-1)*NoiseColumns] += triSurfaceNormal;
-			normals[i+1 + (NoiseRows-1)*NoiseColumns] += triSurfaceNormal;
-			triSurfaceNormal = calculateSurfaceNormal(right[i/lodStepsSize], vertices[i+1 + (NoiseRows-1)*NoiseColumns], right[(i+1)/lodStepsSize]);
-			normals[i+1 + (NoiseRows-1)*NoiseColumns] += triSurfaceNormal;
-		}
+		// 	triSurfaceNormal = calculateSurfaceNormal(vertices[i + (NoiseRows-1)*pointsOnLine], vertices[i+1 + (NoiseRows-1)*pointsOnLine], right[(i+1)/lodStepsSize]);
+		// 	normals[i + (NoiseRows-1)*pointsOnLine] += triSurfaceNormal;
+		// 	normals[i+1 + (NoiseRows-1)*pointsOnLine] += triSurfaceNormal;
+		// 	triSurfaceNormal = calculateSurfaceNormal(right[i/lodStepsSize], vertices[i+1 + (NoiseRows-1)*pointsOnLine], right[(i+1)/lodStepsSize]);
+		// 	normals[i+1 + (NoiseRows-1)*pointsOnLine] += triSurfaceNormal;
+		// }
 
-		normals[0] += calculateSurfaceNormal(topLeft, vertices[0], top[0]);
-		normals[0] += calculateSurfaceNormal(topLeft, left[0], vertices[0]);
-		normals[totalPointsOnGrid-1] += calculateSurfaceNormal(vertices[totalPointsOnGrid-1], bottomRight, right[pointsOnLine-1]);
-		normals[totalPointsOnGrid-1] += calculateSurfaceNormal(vertices[totalPointsOnGrid-1], bottom[pointsOnLine-1], bottomRight);
-		normals[pointsOnLine-1] += calculateSurfaceNormal(vertices[pointsOnLine-1], left[pointsOnLine-1], bottom[0]);
-		normals[(pointsOnLine-1)*pointsOnLine] += calculateSurfaceNormal(top[pointsOnLine-1], vertices[(pointsOnLine-1)*pointsOnLine], right[0]);
+		// normals[0] += calculateSurfaceNormal(topLeft, vertices[0], top[0]);
+		// normals[0] += calculateSurfaceNormal(topLeft, left[0], vertices[0]);
+		// normals[totalPointsOnGrid-1] += calculateSurfaceNormal(vertices[totalPointsOnGrid-1], bottomRight, right[pointsOnLine-1]);
+		// normals[totalPointsOnGrid-1] += calculateSurfaceNormal(vertices[totalPointsOnGrid-1], bottom[pointsOnLine-1], bottomRight);
+		// normals[pointsOnLine-1] += calculateSurfaceNormal(vertices[pointsOnLine-1], left[pointsOnLine-1], bottom[0]);
+		// normals[(pointsOnLine-1)*pointsOnLine] += calculateSurfaceNormal(top[pointsOnLine-1], vertices[(pointsOnLine-1)*pointsOnLine], right[0]);
 
 		// normalize all vertex normals
-		for (int i = 0; i < NoiseColumns; i += lodStepsSize) {
-			for (int j = 0; j < NoiseRows; j += lodStepsSize) {
-				normals[i + j*NoiseColumns] = normals[i + j*NoiseColumns].Normalized();
+		for (int i = 0; i < pointsOnLine; i += lodStepsSize) {
+			for (int j = 0; j < pointsOnLine; j += lodStepsSize) {
+				normals[i + j*pointsOnLine] = normals[i + j*pointsOnLine].Normalized();
 			}
 		}
 
