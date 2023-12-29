@@ -91,8 +91,6 @@ public partial class TerrainChunk : MeshInstance3D {
 
 		Vector3[] normals = new Vector3[totalPointsOnGrid];
 
-		// GD.Print($"{lodStepsSize} {totalPointsOnGrid} {NoiseRows-1}");
-		GD.Print((NoiseRows-1)/lodStepsSize + 1);
 		int[] indices = new int[6*(pointsOnLine-1)*(pointsOnLine-1)];
 		int indiceIndex = 0;
 
