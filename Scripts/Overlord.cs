@@ -40,8 +40,7 @@ public partial class Overlord : Node3D {
     
 
     public override void _Ready() {
-
-		refreshChildren();
+		// refreshChildren();
 
 		if (noise is not null)
 			NMG = new NoiseMapGenerator(noise);
@@ -51,23 +50,31 @@ public partial class Overlord : Node3D {
 		terrainParameters = new TerrainParameters(NoiseRows, NoiseColumns, NoiseScale, CellWidth, HeightLimit, noise, HeightMask, ColorMask, NMG);
 		terrainChunkScene = GD.Load<PackedScene>("res://Scenes/TerrainChunk.tscn");
 
-		previousChunk = createNewChunk(playerChunkCoor);
+		playerChunkCoor.X = Mathf.FloorToInt(CellWidth*player.Position.X/NoiseRows);
+		playerChunkCoor.Y = Mathf.FloorToInt(CellWidth*player.Position.Z/NoiseRows);
+		if (chunkStorage.ContainsKey(playerChunkCoor)) {
+			previousChunk = chunkStorage[playerChunkCoor];
+		}
+		else {
+			previousChunk = createNewChunk(playerChunkCoor);
+		}
+		previousChunk.Position = new Vector3(playerChunkCoor.X*CellWidth*NoiseRows, 0, playerChunkCoor.Y*CellWidth*NoiseColumns);
 		previousChunk.isVisible = true;
     }
 
 
     public override void _Process(double delta) {
-		playerChunkCoor.X = (int)player.Position.X/NoiseRows;
-		playerChunkCoor.Y = (int)player.Position.Z/NoiseRows;
+		playerChunkCoor.X = Mathf.FloorToInt(CellWidth*player.Position.X/NoiseRows);
+		playerChunkCoor.Y = Mathf.FloorToInt(CellWidth*player.Position.Z/NoiseRows);
+		// GD.Print($"{playerChunkCoor} {player.Position}");
 		if (prevPlayerChunkCoor.X != playerChunkCoor.X && prevPlayerChunkCoor.Y != playerChunkCoor.Y) {
-			GD.Print("this is running");
 			previousChunk.isVisible = false;
 			TerrainChunk terrainChunk;
-			if (!chunkStorage.ContainsKey(playerChunkCoor)) {
-				terrainChunk = createNewChunk(playerChunkCoor);
+			if (chunkStorage.ContainsKey(playerChunkCoor)) {
+				terrainChunk = chunkStorage[playerChunkCoor];
 			}
 			else {
-				terrainChunk = chunkStorage[playerChunkCoor];
+				terrainChunk = createNewChunk(playerChunkCoor);
 			}
 			terrainChunk.isVisible = true;
 			previousChunk = terrainChunk;
@@ -89,6 +96,7 @@ public partial class Overlord : Node3D {
 		TerrainChunk terrainChunk = terrainChunkScene.Instantiate<TerrainChunk>();
 		terrainChunk.setTerrainParameters(terrainParameters);
 		terrainChunk.setChunkParameters(new Vector2(player.Position.X/NoiseRows, player.Position.Z/NoiseColumns), 0);
+		terrainChunk.Position = new Vector3(playerChunkCoor.X*CellWidth*NoiseRows, 0, playerChunkCoor.Y*CellWidth*NoiseColumns);
 		GetNode("TerrainChunks").AddChild(terrainChunk);
 		terrainChunk.Owner = this;
 		chunkStorage.Add(chunkCoordinate, terrainChunk);

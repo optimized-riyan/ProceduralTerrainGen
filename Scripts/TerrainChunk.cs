@@ -31,6 +31,7 @@ public partial class TerrainChunk : MeshInstance3D {
 	public int lodIndex = 0;
 	private int[] lodStepsSizes = new int[]{1, 2, 4, 8, 18, 30};
 	public bool isVisible = false;
+	[Export]
 	private bool isUpdatePending = false;
 
 
