@@ -37,7 +37,8 @@ public partial class Overlord : Node3D {
 		PackedScene terrainChunkScene = GD.Load<PackedScene>("res://Scenes/TerrainChunk.tscn");
 		TerrainChunk terrainChunk = terrainChunkScene.Instantiate<TerrainChunk>();
 		terrainChunk.setTerrainParameters(terrainParameters);
-		AddChild(terrainChunk);
+		GetNode("TerrainChunks").AddChild(terrainChunk);
+		terrainChunk.Owner = this;
     }
 
 
