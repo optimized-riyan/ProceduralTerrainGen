@@ -27,11 +27,11 @@ public partial class TerrainChunk : MeshInstance3D {
 	// specific to chunk
 	private float[,] noiseMap;
 	private Vector2 chunkCoordinate;
-	[Export]
+	private Vector2 offset;
 	public int lodIndex = 0;
 	private int[] lodStepsSizes = new int[]{1, 2, 4, 8, 18, 30};
-	[Export]
-	private bool Update = false;
+	public bool isVisible = false;
+	private bool isUpdatePending = false;
 
 
 	public override void _Ready() {
@@ -43,8 +43,8 @@ public partial class TerrainChunk : MeshInstance3D {
 
 
     public override void _Process(double delta) {
-        if (Update) {
-			Update = false;
+        if (isUpdatePending) {
+			isUpdatePending = false;
 			onReload();
 		}
     }
@@ -55,6 +55,7 @@ public partial class TerrainChunk : MeshInstance3D {
 		regenerateNoiseMap();
 		generateTerrain();
 		generateTexture();
+		this.Visible = isVisible;
 	}
 
 
@@ -69,6 +70,12 @@ public partial class TerrainChunk : MeshInstance3D {
 		this.ColorMask = terrainParameters.ColorMask;
 		this.NMG = terrainParameters.NMG;
 	}
+
+
+    public void setChunkParameters(Vector2 chunkCoor, int lodIndex) {
+        this.chunkCoordinate = chunkCoor;
+		this.lodIndex = lodIndex;
+    }
 
 
 	private void regenerateNoiseMap() {
@@ -217,11 +224,6 @@ public partial class TerrainChunk : MeshInstance3D {
 		arrayMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, array);
 
 		this.Mesh = arrayMesh;
-	}
-
-
-	private void updateTerrainChunkLod() {
-
 	}
 
 
