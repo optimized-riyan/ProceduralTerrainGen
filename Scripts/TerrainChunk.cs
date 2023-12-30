@@ -6,40 +6,38 @@ using Global;
 public partial class TerrainChunk : MeshInstance3D {
 
 	[ExportGroup("Terrain Parameters")]
-	private int NoiseRows = 181;
-	private int NoiseColumns = 181;
+	public int NoiseRows = 181;
+	public int NoiseColumns = 181;
 	[Export(PropertyHint.Range, "0,1,or_greater")]
-	private float NoiseScale = 0.35F;
+	public float NoiseScale = 0.35F;
 	[Export]
-	private float CellWidth = 4F;
+	public float CellWidth = 4F;
 	[Export]
-	private float HeightLimit = 100F;
+	public float HeightLimit = 100F;
 	[Export]
-	private int NoiseSeed = 0;
+	public int NoiseSeed = 0;
 	[Export]
-	private FastNoiseLite noise;
+	public FastNoiseLite noise;
 	[Export]
-	private Curve HeightMask;
+	public Curve HeightMask;
 	[Export]
-	private Gradient ColorMask;
-	private NoiseMapGenerator NMG;
+	public Gradient ColorMask;
+	public NoiseMapGenerator NMG;
+
+	// specific to chunk
 	private float[,] noiseMap;
 	private Vector2 chunkCoordinate;
 	[Export]
 	public int lodIndex = 0;
-	private int[] lodStepsSizes = new int[]{1, 4, 8, 12, 18, 30};
+	private int[] lodStepsSizes = new int[]{1, 2, 4, 8, 18, 30};
 	[Export]
 	private bool Update = false;
 
 
-	// public TerrainChunk(Vector2 chunkCoor) {
-
-	// }
-
-
 	public override void _Ready() {
-		NMG = new NoiseMapGenerator(noise);
-
+		if (GetParent() is null) {
+			NMG = new NoiseMapGenerator(noise);
+		}
 		onReload();
 	}
 
@@ -57,6 +55,19 @@ public partial class TerrainChunk : MeshInstance3D {
 		regenerateNoiseMap();
 		generateTerrain();
 		generateTexture();
+	}
+
+
+	public void setTerrainParameters(TerrainParameters terrainParameters) {
+		this.NoiseRows = terrainParameters.NoiseRows;
+		this.NoiseColumns = terrainParameters.NoiseColumns;
+		this.NoiseScale = terrainParameters.NoiseScale;
+		this.CellWidth = terrainParameters.CellWidth;
+		this.HeightLimit = terrainParameters.HeightLimit;
+		this.noise = terrainParameters.noise;
+		this.HeightMask = terrainParameters.HeightMask;
+		this.ColorMask = terrainParameters.ColorMask;
+		this.NMG = terrainParameters.NMG;
 	}
 
 

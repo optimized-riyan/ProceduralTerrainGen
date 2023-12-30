@@ -1,6 +1,34 @@
 using Godot;
 
 namespace Global {
+
+	public struct TerrainParameters {
+		public int NoiseRows = 181;
+		public int NoiseColumns = 181;
+		public float NoiseScale = 0.35F;
+		public float CellWidth = 4F;
+		public float HeightLimit = 100F;
+		public int NoiseSeed = 0;
+		public FastNoiseLite noise;
+		public Curve HeightMask;
+		public Gradient ColorMask;
+		public NoiseMapGenerator NMG;
+
+        public TerrainParameters(int NoiseRows, int NoiseColumns, float NoiseScale, float CellWidth, float HeightLimit, FastNoiseLite noise, Curve HeightMask, Gradient ColorMask, NoiseMapGenerator NMG) {
+			this.NoiseRows = NoiseRows;
+			this.NoiseColumns = NoiseColumns;
+			this.NoiseScale = NoiseScale;
+			this.CellWidth = CellWidth;
+			this.HeightLimit = HeightLimit;
+			this.noise = noise;
+			this.HeightMask = HeightMask;
+			this.ColorMask = ColorMask;
+			this.NMG = NMG;
+        }
+    }
+
+
+
 	public class NoiseMapGenerator {
 
 		private FastNoiseLite noise;
