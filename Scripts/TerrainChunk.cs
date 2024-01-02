@@ -30,9 +30,8 @@ public partial class TerrainChunk : MeshInstance3D {
 	private Vector2 offset;
 	public int lodIndex = 0;
 	private int[] lodStepsSizes = new int[]{1, 2, 4, 8, 18, 30};
-	public bool isVisible = false;
 	[Export]
-	private bool isUpdatePending = false;
+	public bool isUpdatePending = false;
 
 
 	public override void _Ready() {
@@ -56,7 +55,6 @@ public partial class TerrainChunk : MeshInstance3D {
 		regenerateNoiseMap();
 		generateTerrain();
 		generateTexture();
-		this.Visible = isVisible;
 	}
 
 

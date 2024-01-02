@@ -30,17 +30,17 @@ public partial class Overlord : Node3D {
 	private NoiseMapGenerator NMG;
 	private TerrainParameters terrainParameters;
 	private PackedScene terrainChunkScene;
+	private int chunkId = 1;
 	private Godot.Collections.Dictionary<Vector2I, TerrainChunk> chunkStorage;
 
 
 	public Overlord() {
-		chunkStorage = new Godot.Collections.Dictionary<Vector2I, TerrainChunk>();
 		playerChunkCoor = new Vector2I();
 	}
-    
+	
 
-    public override void _Ready() {
-		// refreshChildren();
+	public override void _Ready() {
+		chunkStorage = new Godot.Collections.Dictionary<Vector2I, TerrainChunk>();
 
 		if (noise is not null)
 			NMG = new NoiseMapGenerator(noise);
@@ -50,8 +50,8 @@ public partial class Overlord : Node3D {
 		terrainParameters = new TerrainParameters(NoiseRows, NoiseColumns, NoiseScale, CellWidth, HeightLimit, noise, HeightMask, ColorMask, NMG);
 		terrainChunkScene = GD.Load<PackedScene>("res://Scenes/TerrainChunk.tscn");
 
-		playerChunkCoor.X = Mathf.FloorToInt(CellWidth*player.Position.X/NoiseRows);
-		playerChunkCoor.Y = Mathf.FloorToInt(CellWidth*player.Position.Z/NoiseRows);
+		playerChunkCoor.X = Mathf.FloorToInt(player.Position.X/(NoiseRows*CellWidth));
+		playerChunkCoor.Y = Mathf.FloorToInt(player.Position.Z/(NoiseColumns*CellWidth));
 		if (chunkStorage.ContainsKey(playerChunkCoor)) {
 			previousChunk = chunkStorage[playerChunkCoor];
 		}
@@ -59,16 +59,18 @@ public partial class Overlord : Node3D {
 			previousChunk = createNewChunk(playerChunkCoor);
 		}
 		previousChunk.Position = new Vector3(playerChunkCoor.X*CellWidth*NoiseRows, 0, playerChunkCoor.Y*CellWidth*NoiseColumns);
-		previousChunk.isVisible = true;
-    }
+		previousChunk.Visible = true;
+		previousChunk.isUpdatePending = true;
+		prevPlayerChunkCoor.X = playerChunkCoor.X;
+		prevPlayerChunkCoor.Y = playerChunkCoor.Y;
+	}
 
 
-    public override void _Process(double delta) {
-		playerChunkCoor.X = Mathf.FloorToInt(CellWidth*player.Position.X/NoiseRows);
-		playerChunkCoor.Y = Mathf.FloorToInt(CellWidth*player.Position.Z/NoiseRows);
-		// GD.Print($"{playerChunkCoor} {player.Position}");
-		if (prevPlayerChunkCoor.X != playerChunkCoor.X && prevPlayerChunkCoor.Y != playerChunkCoor.Y) {
-			previousChunk.isVisible = false;
+	public override void _Process(double delta) {
+		playerChunkCoor.X = Mathf.FloorToInt(player.Position.X/(NoiseRows*CellWidth));
+		playerChunkCoor.Y = Mathf.FloorToInt(player.Position.Z/(NoiseColumns*CellWidth));
+		if (prevPlayerChunkCoor.X != playerChunkCoor.X || prevPlayerChunkCoor.Y != playerChunkCoor.Y) {
+			previousChunk.Visible = false;
 			TerrainChunk terrainChunk;
 			if (chunkStorage.ContainsKey(playerChunkCoor)) {
 				terrainChunk = chunkStorage[playerChunkCoor];
@@ -76,8 +78,9 @@ public partial class Overlord : Node3D {
 			else {
 				terrainChunk = createNewChunk(playerChunkCoor);
 			}
-			terrainChunk.isVisible = true;
+			terrainChunk.Visible = true;
 			previousChunk = terrainChunk;
+			GD.Print(chunkStorage);
 		}
 
 		prevPlayerChunkCoor.X = playerChunkCoor.X;
@@ -85,18 +88,12 @@ public partial class Overlord : Node3D {
 	}
 
 
-	private void refreshChildren() {
-		Godot.Collections.Array<Node> terrainChunks = GetNode<Node3D>("TerrainChunks").GetChildren();
-		foreach (Node terrainChunk in terrainChunks) 
-			terrainChunk.QueueFree();
-	}
-
-
 	private TerrainChunk createNewChunk(Vector2I chunkCoordinate) {
 		TerrainChunk terrainChunk = terrainChunkScene.Instantiate<TerrainChunk>();
 		terrainChunk.setTerrainParameters(terrainParameters);
-		terrainChunk.setChunkParameters(new Vector2(player.Position.X/NoiseRows, player.Position.Z/NoiseColumns), 0);
-		terrainChunk.Position = new Vector3(playerChunkCoor.X*CellWidth*NoiseRows, 0, playerChunkCoor.Y*CellWidth*NoiseColumns);
+		terrainChunk.setChunkParameters(chunkCoordinate, 0);
+		terrainChunk.Position = new Vector3(chunkCoordinate.X*CellWidth*NoiseRows, 0, chunkCoordinate.Y*CellWidth*NoiseColumns);
+		terrainChunk.Name = $"TerrainChunk{chunkId++}";
 		GetNode("TerrainChunks").AddChild(terrainChunk);
 		terrainChunk.Owner = this;
 		chunkStorage.Add(chunkCoordinate, terrainChunk);
