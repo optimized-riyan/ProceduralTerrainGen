@@ -17,7 +17,7 @@ renderDistance = 2
 [node name="TerrainChunks" type="Node3D" parent="."]
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(-0.70394, 0.201903, -0.680958, 0, 0.958745, 0.284267, 0.710259, 0.200107, -0.674899, 22.8365, 106.466, 145.406)
+transform = Transform3D(-0.70394, 0.201903, -0.680958, 0, 0.958745, 0.284267, 0.710259, 0.200107, -0.674899, 0, 106.466, 0)
 script = ExtResource("3_2jt4i")
 default_velocity = 32.0
 

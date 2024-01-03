@@ -86,7 +86,7 @@ public partial class Overlord : Node3D {
         Vector2I chunkCoor;
         for (int i = 0; i <= renderDistance; i++) {
             float rangeJ = Mathf.FloorToInt(Mathf.Sqrt(renderDistance*renderDistance - i*i));
-            for (int j = 0; j <= rangeJ; j++) {
+            for (int j = 0; j < rangeJ; j++) {
                 chunkCoor = new Vector2I(playerChunkCoor.X + i, playerChunkCoor.Y + j);
                 terrainChunk = chunkStorage.ContainsKey(chunkCoor) ? chunkStorage[chunkCoor] : createNewChunk(chunkCoor, 0);
                 terrainChunk.Visible = true;
