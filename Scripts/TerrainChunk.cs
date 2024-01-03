@@ -29,15 +29,13 @@ public partial class TerrainChunk : MeshInstance3D {
 	private Vector2 chunkCoordinate;
 	private Vector2 offset;
 	public int lodIndex = 0;
-	private int[] lodStepsSizes = new int[]{1, 2, 4, 8, 18, 30};
+	private int[] lodStepsSizes = new int[]{ 1, 2, 4, 8, 18, 30 };
 	[Export]
 	public bool isUpdatePending = false;
 
 
 	public override void _Ready() {
-		if (GetParent() is null) {
-			NMG = new NoiseMapGenerator(noise);
-		}
+		if (GetParent() is null) { NMG = new NoiseMapGenerator(noise); }
 		onReload();
 	}
 
@@ -92,6 +90,11 @@ public partial class TerrainChunk : MeshInstance3D {
 
 	private Vector3 calculateSurfaceNormal(Vector3 a, Vector3 b, Vector3 c) {
 		return (a-b).Cross(c-b);
+	}
+
+
+	private void updateLOD() {
+		generateTerrain();
 	}
 
 
