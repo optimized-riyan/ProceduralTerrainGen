@@ -58,7 +58,7 @@ public partial class TerrainChunk : MeshInstance3D {
 
 	public void setTerrainParameters(TerrainParameters terrainParameters) {
 		this.NoiseRows = terrainParameters.NoiseRows;
-		this.NoiseColumns = terrainParameters.NoiseColumns;
+		this.NoiseColumns = terrainParameters.NoiseRows;
 		this.NoiseScale = terrainParameters.NoiseScale;
 		this.CellWidth = terrainParameters.CellWidth;
 		this.HeightLimit = terrainParameters.HeightLimit;
@@ -76,7 +76,7 @@ public partial class TerrainChunk : MeshInstance3D {
 
 
 	private void regenerateNoiseMap() {
-		noiseMap = NMG.Generate2DNoiseMap(NoiseRows, NoiseColumns, NoiseScale);
+			noiseMap = NMG.Generate2DNoiseMap(NoiseRows, NoiseColumns, chunkCoordinate.X*NoiseRows, chunkCoordinate.Y*NoiseColumns, NoiseScale);
 	}
 
 

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 public partial class Overlord : Node3D {
 
     [ExportGroup("Terrain Parameters")]
+	[Export(PropertyHint.Range, "2,181,")]
     private int NoiseRows = 181;
     private int NoiseColumns = 181;
     [Export(PropertyHint.Range, "0,1,or_greater")]
