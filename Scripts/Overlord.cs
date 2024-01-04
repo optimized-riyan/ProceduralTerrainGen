@@ -85,25 +85,10 @@ public partial class Overlord : Node3D {
         
         TerrainChunk terrainChunk;
         Vector2I chunkCoor;
-        for (int i = 0; i <= renderDistance; i++) {
-            float rangeJ = Mathf.FloorToInt(Mathf.Sqrt(renderDistance*renderDistance - i*i));
-            for (int j = 0; j < rangeJ; j++) {
+        for (int i = -renderDistance+1; i <= renderDistance-1; i++) {
+            int rangeJ = renderDistance-Mathf.Abs(i)-1;
+            for (int j = -rangeJ; j <= rangeJ; j++) {
                 chunkCoor = new Vector2I(playerChunkCoor.X + i, playerChunkCoor.Y + j);
-                terrainChunk = chunkStorage.ContainsKey(chunkCoor) ? chunkStorage[chunkCoor] : createNewChunk(chunkCoor, 0);
-                terrainChunk.Visible = true;
-                renderedChunks.Add(terrainChunk);
-
-                chunkCoor = new Vector2I(playerChunkCoor.X - i, playerChunkCoor.Y - j);
-                terrainChunk = chunkStorage.ContainsKey(chunkCoor) ? chunkStorage[chunkCoor] : createNewChunk(chunkCoor, 0);
-                terrainChunk.Visible = true;
-                renderedChunks.Add(terrainChunk);
-                
-                chunkCoor = new Vector2I(playerChunkCoor.X + i, playerChunkCoor.Y - j);
-                terrainChunk = chunkStorage.ContainsKey(chunkCoor) ? chunkStorage[chunkCoor] : createNewChunk(chunkCoor, 0);
-                terrainChunk.Visible = true;
-                renderedChunks.Add(terrainChunk);
-
-                chunkCoor = new Vector2I(playerChunkCoor.X - i, playerChunkCoor.Y + j);
                 terrainChunk = chunkStorage.ContainsKey(chunkCoor) ? chunkStorage[chunkCoor] : createNewChunk(chunkCoor, 0);
                 terrainChunk.Visible = true;
                 renderedChunks.Add(terrainChunk);

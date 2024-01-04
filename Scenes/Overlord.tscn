@@ -12,7 +12,7 @@ noise = ExtResource("2_chfiu")
 HeightMask = ExtResource("3_0wabb")
 ColorMask = ExtResource("4_31j4c")
 player = NodePath("Camera3D")
-renderDistance = 2
+renderDistance = 3
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(-0.70394, 0.201903, -0.680958, 0, 0.958745, 0.284267, 0.710259, 0.200107, -0.674899, 0, 106.466, 0)
@@ -21,6 +21,6 @@ default_velocity = 32.0
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -0.970042, 0.242938, 0, -0.242938, -0.970042, 0, 201.969, -303.658)
-light_energy = 0.58
+light_energy = 0.575
 
 [node name="TerrainChunks" type="Node3D" parent="."]
