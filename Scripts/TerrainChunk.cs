@@ -71,12 +71,13 @@ public partial class TerrainChunk : MeshInstance3D {
 
     public void setChunkParameters(Vector2 chunkCoor, int lodIndex) {
         this.chunkCoordinate = chunkCoor;
+        this.Position = new Vector3(chunkCoordinate.X*CellWidth*(NoiseRows-1), 0, chunkCoordinate.Y*CellWidth*(NoiseColumns-1));
 		this.lodIndex = lodIndex;
     }
 
 
 	private void regenerateNoiseMap() {
-			noiseMap = NMG.Generate2DNoiseMap(NoiseRows, NoiseColumns, chunkCoordinate.X*NoiseRows, chunkCoordinate.Y*NoiseColumns, NoiseScale);
+		noiseMap = NMG.Generate2DNoiseMap(NoiseRows, NoiseColumns, chunkCoordinate.X*(NoiseRows-1), chunkCoordinate.Y*(NoiseColumns-1), NoiseScale);
 	}
 
 

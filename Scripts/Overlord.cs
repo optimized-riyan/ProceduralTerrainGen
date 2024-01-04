@@ -116,7 +116,6 @@ public partial class Overlord : Node3D {
         TerrainChunk terrainChunk = terrainChunkScene.Instantiate<TerrainChunk>();
         terrainChunk.setTerrainParameters(terrainParameters);
         terrainChunk.setChunkParameters(chunkCoordinate, lodIndex);
-        terrainChunk.Position = new Vector3(chunkCoordinate.X*CellWidth*NoiseRows, 0, chunkCoordinate.Y*CellWidth*NoiseColumns);
         terrainChunk.Name = $"TerrainChunk{chunkId++}";
         GetNode("TerrainChunks").AddChild(terrainChunk);
         terrainChunk.Owner = this;
