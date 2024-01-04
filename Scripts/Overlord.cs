@@ -28,6 +28,8 @@ public partial class Overlord : Node3D {
     private Node3D player;
     [Export(PropertyHint.Range, "1,16,")]
     private byte renderDistance;
+    [Export]
+    private Curve lodCurve;     // lower the value higher the detail
     private Vector2I playerChunkCoor; 
     private Vector2I prevPlayerChunkCoor;
     private List<TerrainChunk> renderedChunks;
@@ -85,22 +87,30 @@ public partial class Overlord : Node3D {
         
         TerrainChunk terrainChunk;
         Vector2I chunkCoor;
+        
         for (int i = -renderDistance+1; i <= renderDistance-1; i++) {
             int rangeJ = renderDistance-Mathf.Abs(i)-1;
             for (int j = -rangeJ; j <= rangeJ; j++) {
                 chunkCoor = new Vector2I(playerChunkCoor.X + i, playerChunkCoor.Y + j);
-                terrainChunk = chunkStorage.ContainsKey(chunkCoor) ? chunkStorage[chunkCoor] : createNewChunk(chunkCoor, 0);
-                terrainChunk.Visible = true;
+                if (chunkStorage.ContainsKey(chunkCoor)) {
+                    terrainChunk = chunkStorage[chunkCoor];
+                    terrainChunk.updateLOD(lodCurve.SampleBaked(((float)(i*i + j*j))/(renderDistance*renderDistance)));
+                    terrainChunk.Visible = true;
+                }
+                else {
+                    terrainChunk = createNewChunk(chunkCoor);
+                    terrainChunk.updateLOD(lodCurve.SampleBaked(((float)(i*i + j*j))/(renderDistance*renderDistance)));
+                }
                 renderedChunks.Add(terrainChunk);
             }
         }
     }
 
 
-    private TerrainChunk createNewChunk(Vector2I chunkCoordinate, int lodIndex) {
+    private TerrainChunk createNewChunk(Vector2I chunkCoordinate) {
         TerrainChunk terrainChunk = terrainChunkScene.Instantiate<TerrainChunk>();
         terrainChunk.setTerrainParameters(terrainParameters);
-        terrainChunk.setChunkParameters(chunkCoordinate, lodIndex);
+        terrainChunk.setChunkParameters(chunkCoordinate);
         terrainChunk.Name = $"TerrainChunk{chunkId++}";
         GetNode("TerrainChunks").AddChild(terrainChunk);
         terrainChunk.Owner = this;

@@ -29,7 +29,7 @@ public partial class TerrainChunk : MeshInstance3D {
 	private Vector2 chunkCoordinate;
 	private Vector2 offset;
 	public int lodIndex = 0;
-	private int[] lodStepsSizes = new int[]{ 1, 2, 4, 8, 18, 30 };
+	private int[] lodStepSizes = new int[]{ 1, 2, 4, 8, 18, 30 };
 	[Export]
 	public bool isUpdatePending = false;
 
@@ -51,7 +51,7 @@ public partial class TerrainChunk : MeshInstance3D {
 	private void onReload() {
 		updateParameters();
 		regenerateNoiseMap();
-		generateTerrain();
+		generateTerrainMesh();
 		generateTexture();
 	}
 
@@ -69,10 +69,9 @@ public partial class TerrainChunk : MeshInstance3D {
 	}
 
 
-    public void setChunkParameters(Vector2 chunkCoor, int lodIndex) {
+    public void setChunkParameters(Vector2 chunkCoor) {
         this.chunkCoordinate = chunkCoor;
         this.Position = new Vector3(chunkCoordinate.X*CellWidth*(NoiseRows-1), 0, chunkCoordinate.Y*CellWidth*(NoiseColumns-1));
-		this.lodIndex = lodIndex;
     }
 
 
@@ -85,7 +84,7 @@ public partial class TerrainChunk : MeshInstance3D {
 		NMG.HeightMask = this.HeightMask;
 		// for lod calcs, both are same from this point on
 		NoiseColumns = NoiseRows;
-		lodIndex = Mathf.Min(lodIndex, lodStepsSizes.Length-1);
+		lodIndex = Mathf.Min(lodIndex, lodStepSizes.Length-1);
 	}
 
 
@@ -94,14 +93,15 @@ public partial class TerrainChunk : MeshInstance3D {
 	}
 
 
-	private void updateLOD() {
-		generateTerrain();
+	public void updateLOD(float lodF) {
+		lodIndex = Mathf.FloorToInt(lodF*lodStepSizes.Length);
+		generateTerrainMesh();
 	}
 
 
-    private void generateTerrain() {
+    private void generateTerrainMesh() {
 
-		int lodStepsSize = lodStepsSizes[lodIndex];
+		int lodStepsSize = lodStepSizes[lodIndex];
 		int pointsOnLine = (NoiseRows-1)/lodStepsSize + 1;
 		int totalPointsOnGrid = pointsOnLine*pointsOnLine;
 		Vector3[] vertices = new Vector3[totalPointsOnGrid];
