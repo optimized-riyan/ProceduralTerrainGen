@@ -1,6 +1,7 @@
 using Godot;
 using Global;
 using System.Collections.Generic;
+using System.Threading;
 
 
 [Tool]
@@ -27,28 +28,47 @@ public partial class Overlord : Node3D {
     [Export]
     private Node3D player;
     [Export(PropertyHint.Range, "1,16,")]
+    public byte _renderDistance;
     private byte renderDistance;
     [Export]
     private Curve lodCurve;     // lower the value higher the detail
     private Vector2I playerChunkCoor; 
     private Vector2I prevPlayerChunkCoor;
-    private List<TerrainChunk> renderedChunks;
+    private HashSet<TerrainChunk> renderedChunks;
     private NoiseMapGenerator NMG;
     private TerrainParameters terrainParameters;
     private PackedScene terrainChunkScene;
     private int chunkId = 1;
     private Godot.Collections.Dictionary<Vector2I, TerrainChunk> chunkStorage;
+    private Queue<TerrainChunk> chunkCallbackQueue;
+    private Godot.Collections.Array<Vector2I> lodArray;
+    private HashSet<Vector2I> chunksToRender;
+    private HashSet<Vector2I> chunksUnderGen;
+
+
+    void OnTerrainChunkLoaded(TerrainChunk terrainChunk) {
+        if (chunksToRender.Contains(terrainChunk.chunkCoordinate)) {
+            terrainChunk.Visible = true;
+        }
+        else {
+            terrainChunk.Visible = false;
+        }
+    }
 
 
     public Overlord() {
         playerChunkCoor = new Vector2I();
         chunkStorage = new Godot.Collections.Dictionary<Vector2I, TerrainChunk>();
-        renderedChunks = new List<TerrainChunk>();
+        renderedChunks = new HashSet<TerrainChunk>();
+        chunkCallbackQueue = new Queue<TerrainChunk>();
+        chunksToRender = new HashSet<Vector2I>();
+        chunksUnderGen = new HashSet<Vector2I>();
     }
 
 
     public override void _Ready() {
         chunkStorage.Clear();
+        UpdateLODArray();
 
         if (noise is not null)
             NMG = new NoiseMapGenerator(noise);
@@ -61,7 +81,7 @@ public partial class Overlord : Node3D {
         playerChunkCoor.X = Mathf.FloorToInt(player.Position.X/(NoiseRows*CellWidth));
         playerChunkCoor.Y = Mathf.FloorToInt(player.Position.Z/(NoiseColumns*CellWidth));
 
-        updateChunks();
+        UpdateChunks();
 
         prevPlayerChunkCoor.X = playerChunkCoor.X;
         prevPlayerChunkCoor.Y = playerChunkCoor.Y;
@@ -69,48 +89,79 @@ public partial class Overlord : Node3D {
 
 
     public override void _Process(double delta) {
+        if (_renderDistance != renderDistance) {
+            renderDistance = _renderDistance;
+            UpdateLODArray();
+        }
+
+        while (chunkCallbackQueue.Count > 0) {
+            lock (chunkCallbackQueue) {
+                OnTerrainChunkLoaded(chunkCallbackQueue.Dequeue());
+            }
+        }
+
         playerChunkCoor.X = Mathf.FloorToInt(player.Position.X/(NoiseRows*CellWidth));
         playerChunkCoor.Y = Mathf.FloorToInt(player.Position.Z/(NoiseColumns*CellWidth));
 
         if (prevPlayerChunkCoor.X != playerChunkCoor.X || prevPlayerChunkCoor.Y != playerChunkCoor.Y)
-            updateChunks();
+            UpdateChunks();
 
         prevPlayerChunkCoor.X = playerChunkCoor.X;
         prevPlayerChunkCoor.Y = playerChunkCoor.Y;
     }
 
 
-    private void updateChunks() {
+    private void UpdateLODArray() {
+        lodArray = new Godot.Collections.Array<Vector2I>();
+        for (int i = -renderDistance+1; i <= renderDistance-1; i++) {
+            int rangeJ = renderDistance-Mathf.Abs(i)-1;
+            for (int j = -rangeJ; j <= rangeJ; j++)
+                lodArray.Add(new Vector2I(i, j));
+        }
+    }
+
+
+    private void UpdateChunks() {
         foreach (TerrainChunk t in renderedChunks)
             t.Visible = false;
         renderedChunks.Clear();
+        chunksToRender.Clear();
         
-        TerrainChunk terrainChunk;
-        Vector2I chunkCoor;
-        
-        for (int i = -renderDistance+1; i <= renderDistance-1; i++) {
-            int rangeJ = renderDistance-Mathf.Abs(i)-1;
-            for (int j = -rangeJ; j <= rangeJ; j++) {
-                chunkCoor = new Vector2I(playerChunkCoor.X + i, playerChunkCoor.Y + j);
-                if (chunkStorage.ContainsKey(chunkCoor)) {
-                    terrainChunk = chunkStorage[chunkCoor];
-                    terrainChunk.updateLOD(lodCurve.SampleBaked(((float)(i*i + j*j))/(renderDistance*renderDistance)));
-                    terrainChunk.Visible = true;
-                }
-                else {
-                    terrainChunk = createNewChunk(chunkCoor);
-                    terrainChunk.updateLOD(lodCurve.SampleBaked(((float)(i*i + j*j))/(renderDistance*renderDistance)));
-                }
-                renderedChunks.Add(terrainChunk);
+
+        foreach (Vector2I vector in chunksToRender) {
+            int currentI = vector.X;
+            int currentJ = vector.Y;
+            Vector2I chunkCoor = new Vector2I(playerChunkCoor.X + currentI, playerChunkCoor.Y + currentJ);
+            lock (chunksToRender) { chunksToRender.Add(chunkCoor); }
+            lock (chunksUnderGen) {
+                if (chunksUnderGen.Contains(chunkCoor)) continue;
+                chunksUnderGen.Add(chunkCoor);
+            }
+            if (chunkStorage.ContainsKey(chunkCoor)) {
+                ThreadStart threadStart = delegate {
+                    TerrainChunk terrainChunk = chunkStorage[chunkCoor];
+                    terrainChunk.UpdateLOD(lodCurve.SampleBaked(((float)(currentI*currentI + currentJ*currentJ))/(renderDistance*renderDistance)));
+                    lock (chunkCallbackQueue) { chunkCallbackQueue.Enqueue(terrainChunk); }
+                };
+                new Thread(threadStart).Start();
+            }
+            else {
+                ThreadStart threadStart = delegate {
+                    TerrainChunk terrainChunk = CreateNewChunk(chunkCoor, chunkId);
+                    terrainChunk.UpdateLOD(lodCurve.SampleBaked(((float)(currentI*currentI + currentJ*currentJ))/(renderDistance*renderDistance)));
+                    lock (chunkCallbackQueue) { chunkCallbackQueue.Enqueue(terrainChunk); }
+                };
+                new Thread(threadStart).Start();
             }
         }
     }
 
 
-    private TerrainChunk createNewChunk(Vector2I chunkCoordinate) {
+    private TerrainChunk CreateNewChunk(Vector2I chunkCoordinate, int chunkId) {
         TerrainChunk terrainChunk = terrainChunkScene.Instantiate<TerrainChunk>();
-        terrainChunk.setTerrainParameters(terrainParameters);
-        terrainChunk.setChunkParameters(chunkCoordinate);
+        terrainChunk.SetTerrainParameters(terrainParameters);
+        terrainChunk.SetChunkParameters(chunkCoordinate);
+        terrainChunk.OnNew();
         terrainChunk.Name = $"TerrainChunk{chunkId++}";
         GetNode("TerrainChunks").AddChild(terrainChunk);
         terrainChunk.Owner = this;

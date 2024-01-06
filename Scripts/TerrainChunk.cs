@@ -1,5 +1,7 @@
 using Godot;
 using Global;
+using System;
+using System.Threading;
 
 
 [Tool]
@@ -26,37 +28,26 @@ public partial class TerrainChunk : MeshInstance3D {
 
 	// specific to chunk
 	private float[,] noiseMap;
-	private Vector2 chunkCoordinate;
-	private Vector2 offset;
+	public Vector2I chunkCoordinate;
+	private Vector2I offset;
 	public int lodIndex = 0;
 	private int[] lodStepSizes = new int[]{ 1, 2, 4, 8, 18, 30 };
-	[Export]
-	public bool isUpdatePending = false;
+	private ArrayMesh[] cachedArrayMeshes = new ArrayMesh[6];
 
 
 	public override void _Ready() {
 		if (GetParent() is null) { NMG = new NoiseMapGenerator(noise); }
-		onReload();
 	}
 
 
-    public override void _Process(double delta) {
-        if (isUpdatePending) {
-			isUpdatePending = false;
-			onReload();
-		}
-    }
-
-
-	private void onReload() {
-		updateParameters();
-		regenerateNoiseMap();
-		generateTerrainMesh();
-		generateTexture();
+	public void OnNew() {
+		UpdateParameters();
+		GenerateNoiseMap();
+		GenerateTexture();
 	}
 
 
-	public void setTerrainParameters(TerrainParameters terrainParameters) {
+	public void SetTerrainParameters(TerrainParameters terrainParameters) {
 		this.NoiseRows = terrainParameters.NoiseRows;
 		this.NoiseColumns = terrainParameters.NoiseRows;
 		this.NoiseScale = terrainParameters.NoiseScale;
@@ -69,18 +60,18 @@ public partial class TerrainChunk : MeshInstance3D {
 	}
 
 
-    public void setChunkParameters(Vector2 chunkCoor) {
+    public void SetChunkParameters(Vector2I chunkCoor) {
         this.chunkCoordinate = chunkCoor;
         this.Position = new Vector3(chunkCoordinate.X*CellWidth*(NoiseRows-1), 0, chunkCoordinate.Y*CellWidth*(NoiseColumns-1));
     }
 
 
-	private void regenerateNoiseMap() {
+	private void GenerateNoiseMap() {
 		noiseMap = NMG.Generate2DNoiseMap(NoiseRows, NoiseColumns, chunkCoordinate.X*(NoiseRows-1), chunkCoordinate.Y*(NoiseColumns-1), NoiseScale);
 	}
 
 
-	private void updateParameters() {
+	private void UpdateParameters() {
 		NMG.HeightMask = this.HeightMask;
 		// for lod calcs, both are same from this point on
 		NoiseColumns = NoiseRows;
@@ -88,18 +79,25 @@ public partial class TerrainChunk : MeshInstance3D {
 	}
 
 
-	private Vector3 calculateSurfaceNormal(Vector3 a, Vector3 b, Vector3 c) {
-		return (a-b).Cross(c-b);
-	}
+	private Vector3 CalculateSurfaceNormal(Vector3 a, Vector3 b, Vector3 c) { return (a-b).Cross(c-b); }
 
 
-	public void updateLOD(float lodF) {
+	public void UpdateLOD(float lodF) {
 		lodIndex = Mathf.FloorToInt(lodF*lodStepSizes.Length);
-		generateTerrainMesh();
+		GenerateTerrainMesh();
 	}
 
+	public void UpdateLOD() {
+		GenerateTerrainMesh();
+	} 
 
-    private void generateTerrainMesh() {
+
+    private void GenerateTerrainMesh() {
+
+		if (cachedArrayMeshes[lodIndex] != null) {
+			this.Mesh = cachedArrayMeshes[lodIndex];
+			return;
+		}
 
 		int lodStepsSize = lodStepSizes[lodIndex];
 		int pointsOnLine = (NoiseRows-1)/lodStepsSize + 1;
@@ -140,12 +138,12 @@ public partial class TerrainChunk : MeshInstance3D {
 				indices[indiceIndex++] = b;
 				indices[indiceIndex++] = c;
 
-				triSurfaceNormal = calculateSurfaceNormal(vertices[a], vertices[c], vertices[d]);
+				triSurfaceNormal = CalculateSurfaceNormal(vertices[a], vertices[c], vertices[d]);
 				normals[a] += triSurfaceNormal;
 				normals[c] += triSurfaceNormal;
 				normals[d] += triSurfaceNormal;
 
-				triSurfaceNormal = calculateSurfaceNormal(vertices[a], vertices[b], vertices[c]);
+				triSurfaceNormal = CalculateSurfaceNormal(vertices[a], vertices[b], vertices[c]);
 				normals[a] += triSurfaceNormal;
 				normals[b] += triSurfaceNormal;
 				normals[c] += triSurfaceNormal;
@@ -225,12 +223,13 @@ public partial class TerrainChunk : MeshInstance3D {
 		array[(int)Mesh.ArrayType.Normal] = normals;
 
 		arrayMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, array);
+		cachedArrayMeshes[lodIndex] = arrayMesh;
 
 		this.Mesh = arrayMesh;
 	}
 
 
-	private void generateTexture() {
+	private void GenerateTexture() {
 		Image img = new Image();
 		byte[] imageData = new byte[NoiseRows*NoiseColumns*3];
 		Color sampledPoint;
