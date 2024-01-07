@@ -60,6 +60,8 @@ public partial class Overlord : Node3D {
         }
         lock(chunksUnderGen) chunksUnderGen.Remove(terrainChunk.chunkCoordinate);
         terrainChunk.SetDeferred("name", $"TerrainChunk{chunkId++}");
+        terrainChunk.SetTerrainMesh();
+        terrainChunk.SetMaterial();
     }
 
 
