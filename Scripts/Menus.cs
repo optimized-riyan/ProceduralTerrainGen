@@ -22,8 +22,8 @@ public partial class Menus : Control {
     private Button settingsPause;
     private Button exitPause;
     private Button back;
-    private HSlider renderDistance;
-    private Node3D overlord;
+    private HSlider renderDistanceSlider;
+    private Overlord overlord;
     private GameState prevGameState;
 
     public GameState _gameState;
@@ -42,12 +42,17 @@ public partial class Menus : Control {
         mainMenu.GetNode<Button>("Settings").Pressed += OnSettingsPressed;
         mainMenu.GetNode<Button>("Exit").Pressed += OnExitPressed;
 
-        settingsMenu.GetNode<HSlider>("RenderDistance").DragEnded += OnRenderDistanceDragEnded;
+        renderDistanceSlider = settingsMenu.GetNode<HSlider>("RenderDistance");
+        renderDistanceSlider.DragEnded += OnRenderDistanceDragEnded;
         settingsMenu.GetNode<Button>("Back").Pressed += OnBackPressed;
 
         pauseMenu.GetNode<Button>("Resume").Pressed += OnResumePressed;
         pauseMenu.GetNode<Button>("Settings").Pressed += OnSettingsPressed;
         pauseMenu.GetNode<Button>("Exit").Pressed += OnExitPressed;
+
+        overlord = GD.Load<PackedScene>("res://Scenes/Overlord.tscn").Instantiate<Overlord>();
+        overlord.ProcessMode = ProcessModeEnum.Pausable;
+        overlord.GamePauseToggled += OnEscapePressed;
     }
 
 
@@ -86,9 +91,6 @@ public partial class Menus : Control {
 
 
     private void OnExplorePressed() {
-        overlord = GD.Load<PackedScene>("res://Scenes/Overlord.tscn").Instantiate<Overlord>();
-        overlord.ProcessMode = ProcessModeEnum.Pausable;
-        overlord.Connect(Overlord.SignalName.GamePauseToggled, new Callable(this, nameof(this.OnEscapePressed)));
         this.AddChild(overlord);
         _gameState = GameState.Running;
     }
@@ -111,7 +113,7 @@ public partial class Menus : Control {
     }
 
     private void OnRenderDistanceDragEnded(bool valueChanged) {
-
+        overlord._renderDistance = (byte)renderDistanceSlider.Value;
     }
 
     private void OnEscapePressed() {
