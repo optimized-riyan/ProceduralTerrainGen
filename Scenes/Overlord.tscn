@@ -9,11 +9,13 @@
 
 [node name="Overlord" type="Node3D" node_paths=PackedStringArray("player", "chunksDirectory")]
 script = ExtResource("1_2pu54")
+CellWidth = 8.0
+HeightLimit = 200.0
 noise = ExtResource("2_chfiu")
 HeightMask = ExtResource("3_0wabb")
 ColorMask = ExtResource("4_31j4c")
 player = NodePath("Camera3D")
-_renderDistance = 1
+_renderDistance = 4
 lodCurve = ExtResource("5_avid5")
 chunksDirectory = NodePath("TerrainChunks")
 
