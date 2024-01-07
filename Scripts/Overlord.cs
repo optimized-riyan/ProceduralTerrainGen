@@ -41,9 +41,11 @@ public partial class Overlord : Node3D {
     private int chunkId = 1;
     private Godot.Collections.Dictionary<Vector2I, TerrainChunk> chunkStorage;
     private Queue<TerrainChunk> chunkCallbackQueue;
-    private Godot.Collections.Array<Vector2I> lodArray;
+    private List<Vector2I> lodArray;
     private HashSet<Vector2I> chunksToRender;
     private HashSet<Vector2I> chunksUnderGen;
+    [Export]
+    private Node3D chunksDirectory;
 
 
     void OnTerrainChunkLoaded(TerrainChunk terrainChunk) {
@@ -53,6 +55,8 @@ public partial class Overlord : Node3D {
         else {
             terrainChunk.Visible = false;
         }
+        lock(chunksUnderGen) chunksUnderGen.Remove(terrainChunk.chunkCoordinate);
+        terrainChunk.SetDeferred("name", $"TerrainChunk{chunkId++}");
     }
 
 
@@ -67,7 +71,8 @@ public partial class Overlord : Node3D {
 
 
     public override void _Ready() {
-        chunkStorage.Clear();
+        lock(chunkStorage) { chunkStorage.Clear(); }
+        renderDistance = _renderDistance;
         UpdateLODArray();
 
         if (noise is not null)
@@ -103,8 +108,9 @@ public partial class Overlord : Node3D {
         playerChunkCoor.X = Mathf.FloorToInt(player.Position.X/(NoiseRows*CellWidth));
         playerChunkCoor.Y = Mathf.FloorToInt(player.Position.Z/(NoiseColumns*CellWidth));
 
-        if (prevPlayerChunkCoor.X != playerChunkCoor.X || prevPlayerChunkCoor.Y != playerChunkCoor.Y)
+        if (prevPlayerChunkCoor.X != playerChunkCoor.X || prevPlayerChunkCoor.Y != playerChunkCoor.Y) {
             UpdateChunks();
+        }
 
         prevPlayerChunkCoor.X = playerChunkCoor.X;
         prevPlayerChunkCoor.Y = playerChunkCoor.Y;
@@ -112,23 +118,26 @@ public partial class Overlord : Node3D {
 
 
     private void UpdateLODArray() {
-        lodArray = new Godot.Collections.Array<Vector2I>();
+        lodArray = new List<Vector2I>();
         for (int i = -renderDistance+1; i <= renderDistance-1; i++) {
             int rangeJ = renderDistance-Mathf.Abs(i)-1;
             for (int j = -rangeJ; j <= rangeJ; j++)
                 lodArray.Add(new Vector2I(i, j));
         }
+
+        if (renderDistance == 1) lodArray.Add(new Vector2I(0, 0));
     }
 
 
     private void UpdateChunks() {
-        foreach (TerrainChunk t in renderedChunks)
-            t.Visible = false;
-        renderedChunks.Clear();
-        chunksToRender.Clear();
-        
+        lock (renderedChunks) {
+            foreach (TerrainChunk t in renderedChunks)
+                t.Visible = false;
+            renderedChunks.Clear();
+        }
+        lock(chunksToRender) { chunksToRender.Clear(); }
 
-        foreach (Vector2I vector in chunksToRender) {
+        foreach (Vector2I vector in lodArray) {
             int currentI = vector.X;
             int currentJ = vector.Y;
             Vector2I chunkCoor = new Vector2I(playerChunkCoor.X + currentI, playerChunkCoor.Y + currentJ);
@@ -162,10 +171,10 @@ public partial class Overlord : Node3D {
         terrainChunk.SetTerrainParameters(terrainParameters);
         terrainChunk.SetChunkParameters(chunkCoordinate);
         terrainChunk.OnNew();
-        terrainChunk.Name = $"TerrainChunk{chunkId++}";
-        GetNode("TerrainChunks").AddChild(terrainChunk);
-        terrainChunk.Owner = this;
-        chunkStorage.Add(chunkCoordinate, terrainChunk);
+        // terrainChunk.SetDeferred("name", $"TerrainChunk{chunkId++}");
+        chunksDirectory.CallDeferred("add_child", terrainChunk);
+        terrainChunk.SetDeferred("owner", this);
+        lock (chunkStorage) chunkStorage.Add(chunkCoordinate, terrainChunk);
         return terrainChunk;
     }
 }

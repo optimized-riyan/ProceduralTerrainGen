@@ -7,17 +7,18 @@
 [ext_resource type="Gradient" uid="uid://1mildjb3uf5m" path="res://Resources/ColorMask.tres" id="4_31j4c"]
 [ext_resource type="Curve" uid="uid://u2jgmpvc1lhp" path="res://Resources/LodCurve.tres" id="5_avid5"]
 
-[node name="Overlord" type="Node3D" node_paths=PackedStringArray("player")]
+[node name="Overlord" type="Node3D" node_paths=PackedStringArray("player", "chunksDirectory")]
 script = ExtResource("1_2pu54")
 noise = ExtResource("2_chfiu")
 HeightMask = ExtResource("3_0wabb")
 ColorMask = ExtResource("4_31j4c")
 player = NodePath("Camera3D")
-renderDistance = 4
+_renderDistance = 1
 lodCurve = ExtResource("5_avid5")
+chunksDirectory = NodePath("TerrainChunks")
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(-0.70394, 0.201903, -0.680958, 0, 0.958745, 0.284267, 0.710259, 0.200107, -0.674899, 0, 106.466, 0)
+transform = Transform3D(-0.70394, 0.201903, -0.680958, 0, 0.958745, 0.284267, 0.710259, 0.200107, -0.674899, -836.698, 106.466, 713.765)
 script = ExtResource("3_2jt4i")
 default_velocity = 32.0
 
