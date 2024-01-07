@@ -48,6 +48,10 @@ public partial class Overlord : Node3D {
     private Node3D chunksDirectory;
 
 
+    [Signal]
+    public delegate void GamePauseToggledEventHandler();
+
+
     void OnTerrainChunkLoaded(TerrainChunk terrainChunk) {
         bool isPresent;
         lock (chunksToRender) isPresent = chunksToRender.Contains(terrainChunk.chunkCoordinate);
@@ -183,5 +187,12 @@ public partial class Overlord : Node3D {
         terrainChunk.SetDeferred("owner", this);
         lock (chunkStorage) chunkStorage.Add(chunkCoordinate, terrainChunk);
         return terrainChunk;
+    }
+
+
+    public override void _Input(InputEvent @event) {
+        if (@event is InputEventKey eventKey)
+            if (eventKey.Pressed && eventKey.KeyLabel == Key.Escape)
+                EmitSignal(SignalName.GamePauseToggled);
     }
 }
