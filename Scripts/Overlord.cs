@@ -164,7 +164,6 @@ public partial class Overlord : Node3D {
             }
             else {
                 ThreadStart threadStart = delegate {
-                    GD.Print(chunkCoor);
                     TerrainChunk terrainChunk = CreateNewChunk(chunkCoor, chunkId);
                     terrainChunk.UpdateLOD(lodCurve.SampleBaked(((float)(currentI*currentI + currentJ*currentJ))/(renderDistance*renderDistance)));
                     lock (chunkCallbackQueue) { chunkCallbackQueue.Enqueue(terrainChunk); }
