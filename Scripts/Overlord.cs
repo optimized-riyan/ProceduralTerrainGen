@@ -49,8 +49,11 @@ public partial class Overlord : Node3D {
 
 
     void OnTerrainChunkLoaded(TerrainChunk terrainChunk) {
-        if (chunksToRender.Contains(terrainChunk.chunkCoordinate)) {
+        bool isPresent;
+        lock (chunksToRender) isPresent = chunksToRender.Contains(terrainChunk.chunkCoordinate);
+        if (isPresent) {
             terrainChunk.Visible = true;
+            lock (renderedChunks) renderedChunks.Add(terrainChunk);
         }
         else {
             terrainChunk.Visible = false;
@@ -131,9 +134,12 @@ public partial class Overlord : Node3D {
 
     private void UpdateChunks() {
         lock (renderedChunks) {
-            foreach (TerrainChunk t in renderedChunks)
-                t.Visible = false;
-            renderedChunks.Clear();
+            foreach (TerrainChunk t in renderedChunks) {
+                if (!chunksToRender.Contains(t.chunkCoordinate)) {
+                    t.Visible = false;
+                    renderedChunks.Remove(t);
+                }
+            }
         }
         lock(chunksToRender) { chunksToRender.Clear(); }
 
@@ -171,7 +177,6 @@ public partial class Overlord : Node3D {
         terrainChunk.SetTerrainParameters(terrainParameters);
         terrainChunk.SetChunkParameters(chunkCoordinate);
         terrainChunk.OnNew();
-        // terrainChunk.SetDeferred("name", $"TerrainChunk{chunkId++}");
         chunksDirectory.CallDeferred("add_child", terrainChunk);
         terrainChunk.SetDeferred("owner", this);
         lock (chunkStorage) chunkStorage.Add(chunkCoordinate, terrainChunk);
