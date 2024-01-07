@@ -1,7 +1,5 @@
 using Godot;
 using Global;
-using System;
-using System.Threading;
 
 
 [Tool]
@@ -28,6 +26,7 @@ public partial class TerrainChunk : MeshInstance3D {
 
 	// specific to chunk
 	private float[,] noiseMap;
+	private Material material;
 	public Vector2I chunkCoordinate;
 	private Vector2I offset;
 	public int lodIndex = 0;
@@ -94,10 +93,6 @@ public partial class TerrainChunk : MeshInstance3D {
 
     private void GenerateTerrainMesh() {
 
-		if (cachedArrayMeshes[lodIndex] != null) {
-			this.Mesh = cachedArrayMeshes[lodIndex];
-			return;
-		}
 
 		int lodStepsSize = lodStepSizes[lodIndex];
 		int pointsOnLine = (NoiseRows-1)/lodStepsSize + 1;
@@ -224,8 +219,6 @@ public partial class TerrainChunk : MeshInstance3D {
 
 		arrayMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, array);
 		cachedArrayMeshes[lodIndex] = arrayMesh;
-
-		this.Mesh = arrayMesh;
 	}
 
 
@@ -249,6 +242,16 @@ public partial class TerrainChunk : MeshInstance3D {
 			AlbedoTexture = texture,
 			TextureFilter = BaseMaterial3D.TextureFilterEnum.Nearest
 		};
-        this.MaterialOverride = material;
+		this.material = material;
+	}
+
+	
+	public void SetMaterial() {
+		this.MaterialOverride = this.material;
+	}
+
+
+	public void SetTerrainMesh() {
+		this.Mesh = cachedArrayMeshes[lodIndex];
 	}
 }

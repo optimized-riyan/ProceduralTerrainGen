@@ -49,14 +49,19 @@ public partial class Overlord : Node3D {
 
 
     void OnTerrainChunkLoaded(TerrainChunk terrainChunk) {
-        if (chunksToRender.Contains(terrainChunk.chunkCoordinate)) {
+        bool isPresent;
+        lock (chunksToRender) isPresent = chunksToRender.Contains(terrainChunk.chunkCoordinate);
+        if (isPresent) {
             terrainChunk.Visible = true;
+            lock (renderedChunks) renderedChunks.Add(terrainChunk);
         }
         else {
             terrainChunk.Visible = false;
         }
         lock(chunksUnderGen) chunksUnderGen.Remove(terrainChunk.chunkCoordinate);
         terrainChunk.SetDeferred("name", $"TerrainChunk{chunkId++}");
+        terrainChunk.SetTerrainMesh();
+        terrainChunk.SetMaterial();
     }
 
 
@@ -131,9 +136,12 @@ public partial class Overlord : Node3D {
 
     private void UpdateChunks() {
         lock (renderedChunks) {
-            foreach (TerrainChunk t in renderedChunks)
-                t.Visible = false;
-            renderedChunks.Clear();
+            foreach (TerrainChunk t in renderedChunks) {
+                if (!chunksToRender.Contains(t.chunkCoordinate)) {
+                    t.Visible = false;
+                    renderedChunks.Remove(t);
+                }
+            }
         }
         lock(chunksToRender) { chunksToRender.Clear(); }
 
@@ -156,6 +164,7 @@ public partial class Overlord : Node3D {
             }
             else {
                 ThreadStart threadStart = delegate {
+                    GD.Print(chunkCoor);
                     TerrainChunk terrainChunk = CreateNewChunk(chunkCoor, chunkId);
                     terrainChunk.UpdateLOD(lodCurve.SampleBaked(((float)(currentI*currentI + currentJ*currentJ))/(renderDistance*renderDistance)));
                     lock (chunkCallbackQueue) { chunkCallbackQueue.Enqueue(terrainChunk); }
@@ -171,7 +180,6 @@ public partial class Overlord : Node3D {
         terrainChunk.SetTerrainParameters(terrainParameters);
         terrainChunk.SetChunkParameters(chunkCoordinate);
         terrainChunk.OnNew();
-        // terrainChunk.SetDeferred("name", $"TerrainChunk{chunkId++}");
         chunksDirectory.CallDeferred("add_child", terrainChunk);
         terrainChunk.SetDeferred("owner", this);
         lock (chunkStorage) chunkStorage.Add(chunkCoordinate, terrainChunk);
