@@ -66,6 +66,7 @@ public partial class Overlord : Node3D {
         terrainChunk.SetDeferred("name", $"TerrainChunk{chunkId++}");
         terrainChunk.SetTerrainMesh();
         terrainChunk.SetMaterial();
+        terrainChunk.SetCollisionShape();
     }
 
 

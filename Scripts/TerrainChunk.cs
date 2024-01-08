@@ -3,7 +3,7 @@ using Global;
 
 
 [Tool]
-public partial class TerrainChunk : MeshInstance3D {
+public partial class TerrainChunk : StaticBody3D {
 
     [ExportGroup("Terrain Parameters")]
     public int NoiseRows = 181;
@@ -25,8 +25,11 @@ public partial class TerrainChunk : MeshInstance3D {
     public NoiseMapGenerator NMG;
 
     // specific to chunk
+    private MeshInstance3D terrainChunkMesh;
+    private CollisionShape3D collider;
     private float[,] noiseMap;
     private Material material;
+    private HeightMapShape3D heightMapShape3D;
     public Vector2I chunkCoordinate;
     private Vector2I offset;
     public int lodIndex = 0;
@@ -36,6 +39,9 @@ public partial class TerrainChunk : MeshInstance3D {
 
     public override void _Ready() {
         if (GetParent() is null) { NMG = new NoiseMapGenerator(noise); }
+        terrainChunkMesh = GetNode<MeshInstance3D>("TerrainChunkMesh");
+        collider = GetNode<CollisionShape3D>("Collider");
+        collider.Position = new Vector3((NoiseColumns-1)*CellWidth/2, 0, (NoiseRows-1)*CellWidth/2);
     }
 
 
@@ -85,6 +91,8 @@ public partial class TerrainChunk : MeshInstance3D {
     public void UpdateLOD(float lodF) {
         lodIndex = Mathf.FloorToInt(lodF*lodStepSizes.Length);
         GenerateTerrainMesh();
+        if (lodIndex == 0)
+            GenerateCollisionShape();
     }
 
     public void UpdateLOD() {
@@ -93,7 +101,6 @@ public partial class TerrainChunk : MeshInstance3D {
 
 
     private void GenerateTerrainMesh() {
-
 
         int lodStepsSize = lodStepSizes[lodIndex];
         int pointsOnLine = (NoiseRows-1)/lodStepsSize + 1;
@@ -248,12 +255,39 @@ public partial class TerrainChunk : MeshInstance3D {
     }
 
     
+    private void GenerateCollisionShape() {
+        heightMapShape3D = new HeightMapShape3D {
+            MapWidth = (NoiseRows-1)/lodStepSizes[1] + 1,
+            MapDepth = (NoiseRows-1)/lodStepSizes[1] + 1,
+            MapData = GetCollisionShapeMapData()
+        };
+    }
+
+
+    private float[] GetCollisionShapeMapData() {
+        int lodStepSize = lodStepSizes[1];
+        int pointsOnLine = (NoiseRows-1)/lodStepSize + 1;
+        int totalPointsOnGrid = pointsOnLine*pointsOnLine;
+        float[] arr = new float[totalPointsOnGrid];
+        for (int j = 0; j < NoiseColumns; j+=lodStepSize)
+            for (int i = 0; i < NoiseRows; i+=lodStepSize)
+                arr[i/lodStepSize + j/lodStepSize*pointsOnLine] = noiseMap[i,j]*HeightLimit;
+        return arr;
+    }
+
+
     public void SetMaterial() {
-        this.MaterialOverride = this.material;
+        terrainChunkMesh.MaterialOverride = this.material;
     }
 
 
     public void SetTerrainMesh() {
-        this.Mesh = cachedArrayMeshes[lodIndex];
+        terrainChunkMesh.Mesh = cachedArrayMeshes[lodIndex];
+    }
+
+
+    public void SetCollisionShape() {
+        collider.Shape = heightMapShape3D;
+        collider.Scale = new Vector3(CellWidth*lodStepSizes[1], 1, CellWidth*lodStepSizes[1]);
     }
 }
