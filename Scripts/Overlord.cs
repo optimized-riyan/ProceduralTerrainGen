@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 
 
-[Tool]
+// [Tool]
 public partial class Overlord : Node3D {
 
     [ExportGroup("Terrain Parameters")]

@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://dnlbhul20mxqu"]
+[gd_scene load_steps=2 format=3 uid="uid://d1psa74q3atjq"]
 
 [ext_resource type="Script" path="res://Scripts/Menus.cs" id="1_idxpe"]
 
@@ -123,34 +123,46 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = -1112.0
-offset_bottom = -608.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Resume" type="Button" parent="Pause"]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 10.2
-anchor_top = 2.925
-anchor_right = 17.95
-anchor_bottom = 5.25
-offset_left = -3.05176e-05
-offset_bottom = -1.52588e-05
+anchor_left = 0.398
+anchor_top = 0.176
+anchor_right = 0.674
+anchor_bottom = 0.312
+offset_left = -37.496
+offset_top = 1.95199
+offset_right = -37.698
+offset_bottom = 2.17398
+grow_horizontal = 2
+grow_vertical = 2
 text = "Resume"
 
 [node name="Settings" type="Button" parent="Pause"]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 10.225
-anchor_top = 6.55
-anchor_right = 17.975
-anchor_bottom = 8.875
+anchor_left = 0.399
+anchor_top = 0.394
+anchor_right = 0.675
+anchor_bottom = 0.531
+offset_left = -37.5229
+offset_top = 2.06299
+offset_right = -37.7249
+offset_bottom = 1.63696
 text = "Settings"
 
 [node name="Exit" type="Button" parent="Pause"]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 10.225
-anchor_top = 10.1
-anchor_right = 17.975
-anchor_bottom = 12.425
+anchor_left = 0.399
+anchor_top = 0.608
+anchor_right = 0.675
+anchor_bottom = 0.744
+offset_left = -37.5229
+offset_top = 1.84097
+offset_right = -37.7249
+offset_bottom = 2.06299
 text = "Exit"
