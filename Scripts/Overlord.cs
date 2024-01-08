@@ -48,6 +48,10 @@ public partial class Overlord : Node3D {
     private Node3D chunksDirectory;
 
 
+    [Signal]
+    public delegate void GamePauseToggledEventHandler();
+
+
     void OnTerrainChunkLoaded(TerrainChunk terrainChunk) {
         bool isPresent;
         lock (chunksToRender) isPresent = chunksToRender.Contains(terrainChunk.chunkCoordinate);
@@ -76,6 +80,7 @@ public partial class Overlord : Node3D {
 
 
     public override void _Ready() {
+        LoadResourcesAndNodePaths();
         lock(chunkStorage) { chunkStorage.Clear(); }
         renderDistance = _renderDistance;
         UpdateLODArray();
@@ -119,6 +124,16 @@ public partial class Overlord : Node3D {
 
         prevPlayerChunkCoor.X = playerChunkCoor.X;
         prevPlayerChunkCoor.Y = playerChunkCoor.Y;
+    }
+
+
+    private void LoadResourcesAndNodePaths() {
+        noise = GD.Load<FastNoiseLite>("res://Resources/TerrainNoise.tres");
+        HeightMask = GD.Load<Curve>("res://Resources/HeightMask.tres");
+        ColorMask = GD.Load<Gradient>("res://Resources/ColorMask.tres");
+        player = GetNode<Node3D>("Camera3D");
+        lodCurve = GD.Load<Curve>("res://Resources/LodCurve.tres");
+        chunksDirectory = GetNode<Node3D>("TerrainChunks");
     }
 
 
@@ -183,5 +198,12 @@ public partial class Overlord : Node3D {
         terrainChunk.SetDeferred("owner", this);
         lock (chunkStorage) chunkStorage.Add(chunkCoordinate, terrainChunk);
         return terrainChunk;
+    }
+
+
+    public override void _Input(InputEvent @event) {
+        if (@event is InputEventKey eventKey)
+            if (eventKey.Pressed && eventKey.KeyLabel == Key.Escape)
+                EmitSignal(SignalName.GamePauseToggled);
     }
 }

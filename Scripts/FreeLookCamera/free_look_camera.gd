@@ -2,7 +2,7 @@
 extends Camera3D
 
 @export_range(0, 10, 0.01) var sensitivity : float = 3
-@export_range(0, 1000, 0.1) var default_velocity : float = 20
+@export_range(0, 1000, 0.1) var default_velocity : float = 800
 @export_range(0, 10, 0.01) var speed_scale : float = 2
 @export_range(1, 100, 0.1) var boost_speed_multiplier : float = 3.0
 @export var max_speed : float = 1000
@@ -43,3 +43,7 @@ func _process(delta):
 		translate(direction * _velocity * delta * boost_speed_multiplier)
 	else:
 		translate(direction * _velocity * delta)
+
+
+func _on_overlord_game_pause_toggled():
+	pass # Replace with function body.
