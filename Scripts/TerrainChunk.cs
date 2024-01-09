@@ -269,9 +269,9 @@ public partial class TerrainChunk : StaticBody3D {
         }
 
         if (lodIndex > 0)
-            collider.Disabled = true;
+            collider.SetDeferred("disabled", true);
         else
-            collider.Disabled = false;
+            collider.SetDeferred("disabled", false);
     }
 
 
@@ -298,15 +298,15 @@ public partial class TerrainChunk : StaticBody3D {
 
 
     public void SetCollisionShape() {
-        collider.Shape = heightMapShape3D;
-        collider.Scale = new Vector3(CellWidth*lodStepSizes[1], 1, CellWidth*lodStepSizes[1]);
+        collider.SetDeferred("shape", heightMapShape3D);
+        collider.SetDeferred("scale", new Vector3(CellWidth*lodStepSizes[1], 1, CellWidth*lodStepSizes[1]));
     }
 
     
     public void AddCollider() {
         if (!isColliderAdded)
             this.AddChild(collider);
-            // collider.Owner = this;
+            collider.Owner = this;
             isColliderAdded = true;
     }
 }
