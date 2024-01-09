@@ -37,10 +37,14 @@ public partial class TerrainChunk : StaticBody3D {
     private ArrayMesh[] cachedArrayMeshes = new ArrayMesh[6];
 
 
+    public TerrainChunk() {
+        collider = new CollisionShape3D();
+    }
+
+
     public override void _Ready() {
         if (GetParent() is null) { NMG = new NoiseMapGenerator(noise); }
         terrainChunkMesh = GetNode<MeshInstance3D>("TerrainChunkMesh");
-        collider = GetNode<CollisionShape3D>("Collider");
         collider.Position = new Vector3((NoiseColumns-1)*CellWidth/2, 0, (NoiseRows-1)*CellWidth/2);
     }
 
@@ -79,7 +83,6 @@ public partial class TerrainChunk : StaticBody3D {
 
     private void UpdateParameters() {
         NMG.HeightMask = this.HeightMask;
-        // for lod calcs, both are same from this point on
         NoiseColumns = NoiseRows;
         lodIndex = Mathf.Min(lodIndex, lodStepSizes.Length-1);
     }
@@ -95,9 +98,7 @@ public partial class TerrainChunk : StaticBody3D {
             GenerateCollisionShape();
     }
 
-    public void UpdateLOD() {
-        GenerateTerrainMesh();
-    } 
+    public void UpdateLOD() { GenerateTerrainMesh(); } 
 
 
     private void GenerateTerrainMesh() {
@@ -261,6 +262,7 @@ public partial class TerrainChunk : StaticBody3D {
             MapDepth = (NoiseRows-1)/lodStepSizes[1] + 1,
             MapData = GetCollisionShapeMapData()
         };
+        SetCollisionShape();
     }
 
 
@@ -289,5 +291,10 @@ public partial class TerrainChunk : StaticBody3D {
     public void SetCollisionShape() {
         collider.Shape = heightMapShape3D;
         collider.Scale = new Vector3(CellWidth*lodStepSizes[1], 1, CellWidth*lodStepSizes[1]);
+    }
+
+    
+    public void AddCollider() {
+        this.AddChild(collider);
     }
 }
