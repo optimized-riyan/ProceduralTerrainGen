@@ -66,7 +66,7 @@ public partial class Overlord : Node3D {
         terrainChunk.SetDeferred("name", $"TerrainChunk{chunkId++}");
         terrainChunk.SetTerrainMesh();
         terrainChunk.SetMaterial();
-        terrainChunk.AddCollider();
+        // terrainChunk.AddCollider();
     }
 
 
@@ -115,6 +115,9 @@ public partial class Overlord : Node3D {
                 OnTerrainChunkLoaded(chunkCallbackQueue.Dequeue());
             }
         }
+
+        // if (player.Position.Y < -100)
+        //     player.Position = new Vector3(player.Position.X, HeightLimit, player.Position.Z);
 
         playerChunkCoor.X = Mathf.FloorToInt(player.Position.X/(NoiseRows*CellWidth));
         playerChunkCoor.Y = Mathf.FloorToInt(player.Position.Z/(NoiseColumns*CellWidth));

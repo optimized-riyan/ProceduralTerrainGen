@@ -35,6 +35,7 @@ public partial class TerrainChunk : StaticBody3D {
     public int lodIndex = 0;
     private int[] lodStepSizes = new int[]{ 1, 2, 4, 9, 18, 30 };
     private ArrayMesh[] cachedArrayMeshes = new ArrayMesh[6];
+    private bool isColliderGenerated = false, isColliderAdded = false;
 
 
     public TerrainChunk() {
@@ -257,20 +258,20 @@ public partial class TerrainChunk : StaticBody3D {
 
     
     private void GenerateCollisionShape() {
-        if (collider is null) {
+        if (!isColliderGenerated) {
             heightMapShape3D = new HeightMapShape3D {
                 MapWidth = (NoiseRows-1)/lodStepSizes[1] + 1,
                 MapDepth = (NoiseRows-1)/lodStepSizes[1] + 1,
                 MapData = GetCollisionShapeMapData()
             };
+            // since this is not in scene tree yet, we can set these sensitive parameters from other thread!
             SetCollisionShape();
         }
-        else {
-            if (lodIndex > 0)
-                collider.Disabled = true;
-            else
-                collider.Disabled = false;
-        }
+
+        if (lodIndex > 0)
+            collider.Disabled = true;
+        else
+            collider.Disabled = false;
     }
 
 
@@ -303,7 +304,9 @@ public partial class TerrainChunk : StaticBody3D {
 
     
     public void AddCollider() {
-        if (collider == null)
+        if (!isColliderAdded)
             this.AddChild(collider);
+            // collider.Owner = this;
+            isColliderAdded = true;
     }
 }

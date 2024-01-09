@@ -8,9 +8,6 @@
 [ext_resource type="PackedScene" uid="uid://cshlofjlefhb" path="res://Scenes/Explorer.tscn" id="6_kix3n"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_13v76"]
-sky_top_color = Color(0.223529, 0.756863, 1, 1)
-sky_horizon_color = Color(0.605882, 0.731466, 0.78325, 1)
-ground_horizon_color = Color(0.605882, 0.731466, 0.78325, 1)
 
 [sub_resource type="Sky" id="Sky_a4cgl"]
 sky_material = SubResource("ProceduralSkyMaterial_13v76")
@@ -27,7 +24,7 @@ noise = ExtResource("2_chfiu")
 HeightMask = ExtResource("3_0wabb")
 ColorMask = ExtResource("4_31j4c")
 player = NodePath("Explorer")
-_renderDistance = 5
+_renderDistance = 3
 lodCurve = ExtResource("5_avid5")
 chunksDirectory = NodePath("TerrainChunks")
 
