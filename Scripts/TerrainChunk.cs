@@ -257,12 +257,20 @@ public partial class TerrainChunk : StaticBody3D {
 
     
     private void GenerateCollisionShape() {
-        heightMapShape3D = new HeightMapShape3D {
-            MapWidth = (NoiseRows-1)/lodStepSizes[1] + 1,
-            MapDepth = (NoiseRows-1)/lodStepSizes[1] + 1,
-            MapData = GetCollisionShapeMapData()
-        };
-        SetCollisionShape();
+        if (collider is null) {
+            heightMapShape3D = new HeightMapShape3D {
+                MapWidth = (NoiseRows-1)/lodStepSizes[1] + 1,
+                MapDepth = (NoiseRows-1)/lodStepSizes[1] + 1,
+                MapData = GetCollisionShapeMapData()
+            };
+            SetCollisionShape();
+        }
+        else {
+            if (lodIndex > 0)
+                collider.Disabled = true;
+            else
+                collider.Disabled = false;
+        }
     }
 
 
@@ -295,6 +303,7 @@ public partial class TerrainChunk : StaticBody3D {
 
     
     public void AddCollider() {
-        this.AddChild(collider);
+        if (collider == null)
+            this.AddChild(collider);
     }
 }
