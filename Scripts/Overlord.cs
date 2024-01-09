@@ -132,9 +132,7 @@ public partial class Overlord : Node3D {
         noise = GD.Load<FastNoiseLite>("res://Resources/TerrainNoise.tres");
         HeightMask = GD.Load<Curve>("res://Resources/HeightMask.tres");
         ColorMask = GD.Load<Gradient>("res://Resources/ColorMask.tres");
-        player = GetNode<Node3D>("Camera3D");
         lodCurve = GD.Load<Curve>("res://Resources/LodCurve.tres");
-        chunksDirectory = GetNode<Node3D>("TerrainChunks");
     }
 
 

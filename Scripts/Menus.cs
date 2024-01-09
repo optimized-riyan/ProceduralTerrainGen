@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Godot;
 
 public partial class Menus : Control {
@@ -70,6 +69,8 @@ public partial class Menus : Control {
                     settingsMenu.Visible = false;
                     pauseMenu.Visible = false;
 
+                    Input.MouseMode = Input.MouseModeEnum.Captured;
+
                     GetTree().Paused = false;
                     break;
                 case GameState.SettingsMenu:
@@ -81,6 +82,8 @@ public partial class Menus : Control {
                     mainMenu.Visible = false;
                     settingsMenu.Visible = false;
                     pauseMenu.Visible = true;
+
+                    Input.MouseMode = Input.MouseModeEnum.Visible;
 
                     GetTree().Paused = true;
                     break;

@@ -88,7 +88,7 @@ grow_horizontal = 2
 tooltip_text = "
 "
 min_value = 1.0
-max_value = 16.0
+max_value = 8.0
 value = 1.0
 
 [node name="RichTextLabel" type="RichTextLabel" parent="Settings"]
@@ -102,7 +102,7 @@ offset_left = -0.496002
 offset_top = -0.23201
 offset_right = -0.18399
 offset_bottom = 0.311996
-text = "Render Distance(1 to 16)"
+text = "Render Distance(1 to 8)"
 
 [node name="Back" type="Button" parent="Settings"]
 layout_mode = 1

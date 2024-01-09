@@ -1,0 +1,69 @@
+[gd_scene load_steps=9 format=3 uid="uid://bexhwxyhvmp4d"]
+
+[ext_resource type="PackedScene" uid="uid://cshlofjlefhb" path="res://Scenes/Explorer.tscn" id="1_sraoy"]
+[ext_resource type="Texture2D" uid="uid://d34kdglr8j6yk" path="res://Resources/PlanetNormalMap.png" id="2_w7fm8"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6wgvg"]
+albedo_color = Color(0.309804, 0.462745, 0.219608, 1)
+normal_enabled = true
+normal_texture = ExtResource("2_w7fm8")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_fuuxh"]
+size = Vector2(200, 200)
+
+[sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_rfcjq"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_axlgx"]
+sky_top_color = Color(0.223529, 0.756863, 1, 1)
+sky_horizon_color = Color(0.605882, 0.731466, 0.78325, 1)
+ground_horizon_color = Color(0.605882, 0.731466, 0.78325, 1)
+
+[sub_resource type="Sky" id="Sky_0bawk"]
+sky_material = SubResource("ProceduralSkyMaterial_axlgx")
+
+[sub_resource type="Environment" id="Environment_y3r1w"]
+background_mode = 2
+sky = SubResource("Sky_0bawk")
+tonemap_mode = 2
+glow_enabled = true
+
+[node name="ExplorerTest" type="Node3D"]
+
+[node name="Explorer" parent="." instance=ExtResource("1_sraoy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.62777, 0)
+
+[node name="Ground" type="StaticBody3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+material_override = SubResource("StandardMaterial3D_6wgvg")
+mesh = SubResource("PlaneMesh_fuuxh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("WorldBoundaryShape3D_rfcjq")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 19.3809, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_y3r1w")
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+visible = false
+anchors_preset = -1
+anchor_left = 0.525
+anchor_top = 0.034
+anchor_right = 0.98
+anchor_bottom = 0.463
+offset_left = 0.199951
+offset_top = -0.0320015
+offset_right = 0.0400391
+offset_bottom = -0.0240173
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
+handle_input_locally = false
+size = Vector2i(524, 278)
+render_target_update_mode = 0
+
+[node name="Camera3D" type="Camera3D" parent="SubViewportContainer/SubViewport"]
+transform = Transform3D(1, 0, 0, 0, 0.995441, 0.0953767, 0, -0.0953767, 0.995441, 0, 5.33851, 20.3192)

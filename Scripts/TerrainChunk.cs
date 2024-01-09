@@ -33,7 +33,7 @@ public partial class TerrainChunk : StaticBody3D {
     public Vector2I chunkCoordinate;
     private Vector2I offset;
     public int lodIndex = 0;
-    private int[] lodStepSizes = new int[]{ 1, 2, 4, 8, 18, 30 };
+    private int[] lodStepSizes = new int[]{ 1, 2, 4, 9, 18, 30 };
     private ArrayMesh[] cachedArrayMeshes = new ArrayMesh[6];
 
 
