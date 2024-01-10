@@ -1,3 +1,4 @@
+using System;
 using Godot;
 
 public partial class Menus : Control {
@@ -10,6 +11,7 @@ public partial class Menus : Control {
     }
 
 
+    private RandomNumberGenerator RNG;
     private GameState gameState;
     private Control mainMenu;
     private Control settingsMenu;
@@ -22,10 +24,15 @@ public partial class Menus : Control {
     private Button exitPause;
     private Button back;
     private HSlider renderDistanceSlider;
+    private PackedScene overlordPS;
     private Overlord overlord;
     private GameState prevGameState;
-
     public GameState _gameState;
+
+
+    public Menus() {
+        RNG = new RandomNumberGenerator();
+    }
 
 
     public override void _Ready() {
@@ -38,20 +45,18 @@ public partial class Menus : Control {
         pauseMenu = this.GetNode<Control>("Pause");
 
         mainMenu.GetNode<Button>("Explore").Pressed += OnExplorePressed;
-        mainMenu.GetNode<Button>("Settings").Pressed += OnSettingsPressed;
         mainMenu.GetNode<Button>("Exit").Pressed += OnExitPressed;
 
         renderDistanceSlider = settingsMenu.GetNode<HSlider>("RenderDistance");
         renderDistanceSlider.DragEnded += OnRenderDistanceDragEnded;
         settingsMenu.GetNode<Button>("Back").Pressed += OnBackPressed;
+        settingsMenu.GetNode<Button>("Randomize").Pressed += OnRandomizePressed;
 
         pauseMenu.GetNode<Button>("Resume").Pressed += OnResumePressed;
         pauseMenu.GetNode<Button>("Settings").Pressed += OnSettingsPressed;
         pauseMenu.GetNode<Button>("Exit").Pressed += OnExitPressed;
 
-        overlord = GD.Load<PackedScene>("res://Scenes/Overlord.tscn").Instantiate<Overlord>();
-        overlord.ProcessMode = ProcessModeEnum.Pausable;
-        overlord.GamePauseToggled += OnEscapePressed;
+        overlordPS = GD.Load<PackedScene>("res://Scenes/Overlord.tscn");
     }
 
 
@@ -94,6 +99,9 @@ public partial class Menus : Control {
 
 
     private void OnExplorePressed() {
+        overlord = overlordPS.Instantiate<Overlord>();
+        overlord.ProcessMode = ProcessModeEnum.Pausable;
+        overlord.GamePauseToggled += OnEscapePressed;
         this.AddChild(overlord);
         _gameState = GameState.Running;
     }
@@ -122,5 +130,14 @@ public partial class Menus : Control {
     private void OnEscapePressed() {
         GetTree().Paused = true;
         _gameState = GameState.PauseMenu;
+    }
+
+    private void OnRandomizePressed() {
+        overlord.QueueFree();
+        overlord = overlordPS.Instantiate<Overlord>();
+        overlord.ProcessMode = ProcessModeEnum.Pausable;
+        overlord.GamePauseToggled += OnEscapePressed;
+        overlord.SetSeed((int)RNG.Randi());
+        this.AddChild(overlord);
     }
 }

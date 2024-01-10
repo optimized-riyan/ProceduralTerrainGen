@@ -93,20 +93,17 @@ public partial class Overlord : Node3D {
         chunkGenQueue = new Queue<ChunkQueueParams>();
         chunksToRender = new HashSet<Vector2I>();
         chunksUnderGen = new HashSet<Vector2I>();
+        NMG = new NoiseMapGenerator(new FastNoiseLite() { NoiseType = FastNoiseLite.NoiseTypeEnum.Perlin });
     }
 
 
     public override void _Ready() {
         LoadResourcesAndNodePaths();
+        NMG.SetSeed(NoiseSeed);
         renderDistance = _renderDistance;
         UpdateLODArray();
 
-        if (noise is not null)
-            NMG = new NoiseMapGenerator(noise);
-        else
-            NMG = new NoiseMapGenerator(new FastNoiseLite() { NoiseType = FastNoiseLite.NoiseTypeEnum.Perlin });
-        
-        terrainParameters = new TerrainParameters(NoiseRows, NoiseColumns, NoiseScale, CellWidth, HeightLimit, noise, HeightMask, ColorMask, NMG);
+        terrainParameters = new TerrainParameters(NoiseRows, NoiseColumns, NoiseScale, CellWidth, HeightLimit, NoiseSeed, noise, HeightMask, ColorMask, NMG);
         terrainChunkScene = GD.Load<PackedScene>("res://Scenes/TerrainChunk.tscn");
 
         StartChunkGenThread();
@@ -223,6 +220,9 @@ public partial class Overlord : Node3D {
         lock (chunkStorage) chunkStorage.Add(chunkCoordinate, terrainChunk);
         return terrainChunk;
     }
+
+
+    public void SetSeed(int seed) { NoiseSeed = seed; }
 
 
     public override void _Input(InputEvent @event) {

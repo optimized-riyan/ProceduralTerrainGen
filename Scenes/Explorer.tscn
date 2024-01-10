@@ -11,6 +11,7 @@ script = ExtResource("1_algaf")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.66307, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Head"]
+fov = 90.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

@@ -14,12 +14,13 @@ namespace Global {
 		public Gradient ColorMask;
 		public NoiseMapGenerator NMG;
 
-        public TerrainParameters(int NoiseRows, int NoiseColumns, float NoiseScale, float CellWidth, float HeightLimit, FastNoiseLite noise, Curve HeightMask, Gradient ColorMask, NoiseMapGenerator NMG) {
+        public TerrainParameters(int NoiseRows, int NoiseColumns, float NoiseScale, float CellWidth, float HeightLimit, int NoiseSeed, FastNoiseLite noise, Curve HeightMask, Gradient ColorMask, NoiseMapGenerator NMG) {
 			this.NoiseRows = NoiseRows;
 			this.NoiseColumns = NoiseColumns;
 			this.NoiseScale = NoiseScale;
 			this.CellWidth = CellWidth;
 			this.HeightLimit = HeightLimit;
+			this.NoiseSeed = NoiseSeed;
 			this.noise = noise;
 			this.HeightMask = HeightMask;
 			this.ColorMask = ColorMask;
@@ -104,6 +105,11 @@ namespace Global {
 
 		public float[,] Generate2DNoiseMap(int length, int width) {
 			return Generate2DNoiseMap(length, width, 0, 0, 0.1F);
+		}
+
+
+		public void SetSeed(int seed) {
+			noise.Seed = seed;
 		}
 	}
 }
