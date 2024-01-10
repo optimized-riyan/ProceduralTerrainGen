@@ -21,6 +21,11 @@ var is_adsing: bool = false
 var current_mouse_sensitivity: float
 
 
+func _ready():
+	up_direction = Vector3.UP
+	floor_max_angle = deg_to_rad(75)
+
+
 func _physics_process(delta):
 	apply_gravity(delta)
 	apply_jump()

@@ -24,7 +24,6 @@ noise = ExtResource("2_chfiu")
 HeightMask = ExtResource("3_0wabb")
 ColorMask = ExtResource("4_31j4c")
 player = NodePath("Explorer")
-_renderDistance = 3
 lodCurve = ExtResource("5_avid5")
 chunksDirectory = NodePath("TerrainChunks")
 

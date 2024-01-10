@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 
 
-[Tool]
+// [Tool]
 public partial class Overlord : Node3D {
 
     [ExportGroup("Terrain Parameters")]
@@ -27,9 +27,9 @@ public partial class Overlord : Node3D {
     private Gradient ColorMask;
     [Export]
     private Node3D player;
-    [Export(PropertyHint.Range, "1,16,")]
-    public byte _renderDistance;
-    private byte renderDistance;
+    [Export(PropertyHint.Range, "1,8,")]
+    public byte _renderDistance = 4;
+    private byte renderDistance = 4;
     [Export]
     private Curve lodCurve;     // lower the value higher the detail
     private Vector2I playerChunkCoor; 
@@ -66,6 +66,7 @@ public partial class Overlord : Node3D {
         terrainChunk.SetDeferred("name", $"TerrainChunk{chunkId++}");
         terrainChunk.SetTerrainMesh();
         terrainChunk.SetMaterial();
+        terrainChunk.SetCollisionShape();
         terrainChunk.AddCollider();
     }
 

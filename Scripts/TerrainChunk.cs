@@ -264,10 +264,9 @@ public partial class TerrainChunk : StaticBody3D {
                 MapDepth = (NoiseRows-1)/lodStepSizes[1] + 1,
                 MapData = GetCollisionShapeMapData()
             };
-            // since this is not in scene tree yet, we can set these sensitive parameters from other thread!
-            SetCollisionShape();
         }
 
+        // built-in function property cannot be changed from outside the main thread, hence CallDeferred, else set these in the main thread.
         if (lodIndex > 0)
             collider.SetDeferred("disabled", true);
         else
@@ -298,8 +297,8 @@ public partial class TerrainChunk : StaticBody3D {
 
 
     public void SetCollisionShape() {
-        collider.SetDeferred("shape", heightMapShape3D);
-        collider.SetDeferred("scale", new Vector3(CellWidth*lodStepSizes[1], 1, CellWidth*lodStepSizes[1]));
+        collider.Shape = heightMapShape3D;
+        collider.Scale = new Vector3(CellWidth*lodStepSizes[1], 1, CellWidth*lodStepSizes[1]);
     }
 
     

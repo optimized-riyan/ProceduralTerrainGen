@@ -2,5 +2,5 @@
 
 [resource]
 bake_resolution = 200
-_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.392562, 0.989309), 0.0, 0.0, 0, 0]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.557756, 0.982782), 0.0, 0.0, 0, 0]
 point_count = 2
