@@ -28,7 +28,7 @@ lodCurve = ExtResource("5_avid5")
 chunksDirectory = NodePath("TerrainChunks")
 
 [node name="Explorer" parent="." instance=ExtResource("6_kix3n")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 46.5256, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 154.182, 0)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_tfb6a")

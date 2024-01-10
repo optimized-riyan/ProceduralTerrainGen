@@ -7,6 +7,17 @@ using System.Threading;
 // [Tool]
 public partial class Overlord : Node3D {
 
+    private struct ChunkQueueParams {
+        public Vector2I chunkCoor;
+        public float dist;
+
+        public ChunkQueueParams(Vector2I chunkCoor, float dist) {
+            this.chunkCoor = chunkCoor;
+            this.dist = dist;
+        }
+    }
+
+
     [ExportGroup("Terrain Parameters")]
 	[Export(PropertyHint.Range, "2,181,")]
     private int NoiseRows = 181;
@@ -41,11 +52,14 @@ public partial class Overlord : Node3D {
     private int chunkId = 1;
     private Godot.Collections.Dictionary<Vector2I, TerrainChunk> chunkStorage;
     private Queue<TerrainChunk> chunkCallbackQueue;
+    private Queue<ChunkQueueParams> chunkGenQueue;
     private List<Vector2I> lodArray;
     private HashSet<Vector2I> chunksToRender;
     private HashSet<Vector2I> chunksUnderGen;
     [Export]
     private Node3D chunksDirectory;
+    private bool killChunkThread = false;
+    private Thread chunkGenThread;
 
 
     [Signal]
@@ -76,6 +90,7 @@ public partial class Overlord : Node3D {
         chunkStorage = new Godot.Collections.Dictionary<Vector2I, TerrainChunk>();
         renderedChunks = new HashSet<TerrainChunk>();
         chunkCallbackQueue = new Queue<TerrainChunk>();
+        chunkGenQueue = new Queue<ChunkQueueParams>();
         chunksToRender = new HashSet<Vector2I>();
         chunksUnderGen = new HashSet<Vector2I>();
     }
@@ -83,7 +98,6 @@ public partial class Overlord : Node3D {
 
     public override void _Ready() {
         LoadResourcesAndNodePaths();
-        lock(chunkStorage) { chunkStorage.Clear(); }
         renderDistance = _renderDistance;
         UpdateLODArray();
 
@@ -95,11 +109,10 @@ public partial class Overlord : Node3D {
         terrainParameters = new TerrainParameters(NoiseRows, NoiseColumns, NoiseScale, CellWidth, HeightLimit, noise, HeightMask, ColorMask, NMG);
         terrainChunkScene = GD.Load<PackedScene>("res://Scenes/TerrainChunk.tscn");
 
+        StartChunkGenThread();
         playerChunkCoor.X = Mathf.FloorToInt(player.Position.X/(NoiseRows*CellWidth));
         playerChunkCoor.Y = Mathf.FloorToInt(player.Position.Z/(NoiseColumns*CellWidth));
-
         UpdateChunks();
-
         prevPlayerChunkCoor.X = playerChunkCoor.X;
         prevPlayerChunkCoor.Y = playerChunkCoor.Y;
     }
@@ -129,6 +142,29 @@ public partial class Overlord : Node3D {
 
         prevPlayerChunkCoor.X = playerChunkCoor.X;
         prevPlayerChunkCoor.Y = playerChunkCoor.Y;
+    }
+
+
+    private void StartChunkGenThread() {
+        ThreadStart threadStart = delegate {
+            while (!killChunkThread) {
+                if (chunkGenQueue.Count > 0) {
+                    ChunkQueueParams chunk = chunkGenQueue.Dequeue();
+                    bool isPresent;
+                    TerrainChunk terrainChunk;
+                    lock (chunkStorage) { isPresent = chunkStorage.ContainsKey(chunk.chunkCoor); }
+                    if (isPresent)
+                        terrainChunk = chunkStorage[chunk.chunkCoor];
+                    else
+                        terrainChunk = CreateNewChunk(chunk.chunkCoor);
+                    terrainChunk.UpdateLOD(lodCurve.SampleBaked(chunk.dist));
+                    lock (chunkCallbackQueue) { chunkCallbackQueue.Enqueue(terrainChunk); }
+                }
+            }
+        };
+        Thread thread = new Thread(threadStart);
+        chunkGenThread = thread;
+        thread.Start();
     }
 
 
@@ -172,27 +208,12 @@ public partial class Overlord : Node3D {
                 if (chunksUnderGen.Contains(chunkCoor)) continue;
                 chunksUnderGen.Add(chunkCoor);
             }
-            if (chunkStorage.ContainsKey(chunkCoor)) {
-                ThreadStart threadStart = delegate {
-                    TerrainChunk terrainChunk = chunkStorage[chunkCoor];
-                    terrainChunk.UpdateLOD(lodCurve.SampleBaked(((float)(currentI*currentI + currentJ*currentJ))/(renderDistance*renderDistance)));
-                    lock (chunkCallbackQueue) { chunkCallbackQueue.Enqueue(terrainChunk); }
-                };
-                new Thread(threadStart).Start();
-            }
-            else {
-                ThreadStart threadStart = delegate {
-                    TerrainChunk terrainChunk = CreateNewChunk(chunkCoor, chunkId);
-                    terrainChunk.UpdateLOD(lodCurve.SampleBaked(((float)(currentI*currentI + currentJ*currentJ))/(renderDistance*renderDistance)));
-                    lock (chunkCallbackQueue) { chunkCallbackQueue.Enqueue(terrainChunk); }
-                };
-                new Thread(threadStart).Start();
-            }
+            lock (chunkGenQueue) { chunkGenQueue.Enqueue(new ChunkQueueParams(chunkCoor, ((float)(currentI*currentI + currentJ*currentJ))/(renderDistance*renderDistance))); }
         }
     }
 
 
-    private TerrainChunk CreateNewChunk(Vector2I chunkCoordinate, int chunkId) {
+    private TerrainChunk CreateNewChunk(Vector2I chunkCoordinate) {
         TerrainChunk terrainChunk = terrainChunkScene.Instantiate<TerrainChunk>();
         terrainChunk.SetTerrainParameters(terrainParameters);
         terrainChunk.SetChunkParameters(chunkCoordinate);
@@ -208,5 +229,11 @@ public partial class Overlord : Node3D {
         if (@event is InputEventKey eventKey)
             if (eventKey.Pressed && eventKey.KeyLabel == Key.Escape)
                 EmitSignal(SignalName.GamePauseToggled);
+    }
+
+
+    public override void _ExitTree() {
+        killChunkThread = true;
+        chunkGenThread.Join();
     }
 }
