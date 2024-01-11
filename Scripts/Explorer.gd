@@ -1,24 +1,21 @@
 extends CharacterBody3D
 
 
-const MOUSE_SENSITIVITY = .1
-const SPEED = 10
-const SPRINT_SPEED = 15
-const GRAVITY = -50
-const JUMP = 20
-const JUMP_COUNT = 2
-const ACCEL = 10
-const AIR_ACCEL = 2
+const mouse_sensitity = .1
+var speed = 35
+var sprint_multiplier = 1.5 - 1
+const gravity = -50
+const jump = 20
+var jump_count = 20000000
+const accel = 10
+const air_accel = 2
+var jumps_left = jump_count
 
 @onready var head: Node3D = $Head
 
 
 var dir: Vector3
-var jump_count: int = JUMP_COUNT
 var current_velocity: Vector3 = Vector3.ZERO
-var mouse_dir: Vector2
-var is_adsing: bool = false
-var current_mouse_sensitivity: float
 
 
 func _ready():
@@ -34,17 +31,17 @@ func _physics_process(delta):
 
 func apply_gravity(delta):
 	if not is_on_floor():
-		velocity.y += GRAVITY * delta
+		velocity.y += gravity * delta
 
 
 func apply_jump():
 	if is_on_floor():
-		jump_count = JUMP_COUNT
+		jumps_left = jump_count
 	
 	if Input.is_action_just_pressed("jump"):
-		if jump_count > 0:
-			velocity.y = JUMP
-			jump_count -= 1
+		if jumps_left > 0:
+			velocity.y = jump
+			jumps_left -= 1
 
 
 func apply_movement():
@@ -62,10 +59,7 @@ func apply_movement():
 	dir = dir.normalized()
 	
 	
-	var accel = ACCEL if is_on_floor() else AIR_ACCEL
-	var speed = SPRINT_SPEED if Input.is_action_pressed("sprint") else SPEED
-	
-	var target_velocity = dir * speed
+	var target_velocity = dir * speed * (1 + sprint_multiplier * (1 if Input.is_action_pressed("sprint") else 0))
 	
 	current_velocity = current_velocity.move_toward(target_velocity, accel)
 	
@@ -78,8 +72,8 @@ func apply_movement():
 # Mouse inputs
 func _input(event):
 	if event is InputEventMouseMotion:
-		var dir_x = deg_to_rad(event.relative.y * MOUSE_SENSITIVITY * -1)
-		var dir_y = deg_to_rad(event.relative.x * MOUSE_SENSITIVITY * -1)
+		var dir_x = deg_to_rad(event.relative.y * mouse_sensitity * -1)
+		var dir_y = deg_to_rad(event.relative.x * mouse_sensitity * -1)
 		
 		# Rotates the view vertically
 		head.rotate_x(dir_x)

@@ -93,11 +93,11 @@ public partial class Overlord : Node3D {
         chunkGenQueue = new Queue<ChunkQueueParams>();
         chunksToRender = new HashSet<Vector2I>();
         chunksUnderGen = new HashSet<Vector2I>();
-        NMG = new NoiseMapGenerator(new FastNoiseLite() { NoiseType = FastNoiseLite.NoiseTypeEnum.Perlin });
     }
 
 
     public override void _Ready() {
+        NMG = new NoiseMapGenerator(noise);
         LoadResourcesAndNodePaths();
         NMG.SetSeed(NoiseSeed);
         renderDistance = _renderDistance;
@@ -223,6 +223,9 @@ public partial class Overlord : Node3D {
 
 
     public void SetSeed(int seed) { NoiseSeed = seed; }
+
+
+    public void SetPlayerSpeed(double speed) { GetNode<CharacterBody3D>("Explorer").Set("movement_speed", speed); }
 
 
     public override void _Input(InputEvent @event) {

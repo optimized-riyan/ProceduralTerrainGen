@@ -24,6 +24,7 @@ public partial class Menus : Control {
     private Button exitPause;
     private Button back;
     private HSlider renderDistanceSlider;
+    private HSlider moveSpeedSlider;
     private PackedScene overlordPS;
     private Overlord overlord;
     private GameState prevGameState;
@@ -49,6 +50,8 @@ public partial class Menus : Control {
 
         renderDistanceSlider = settingsMenu.GetNode<HSlider>("RenderDistance");
         renderDistanceSlider.DragEnded += OnRenderDistanceDragEnded;
+        moveSpeedSlider= settingsMenu.GetNode<HSlider>("MoveSpeed");
+        moveSpeedSlider.DragEnded += OnMoveSpeedChanged;
         settingsMenu.GetNode<Button>("Back").Pressed += OnBackPressed;
         settingsMenu.GetNode<Button>("Randomize").Pressed += OnRandomizePressed;
 
@@ -139,5 +142,18 @@ public partial class Menus : Control {
         overlord.GamePauseToggled += OnEscapePressed;
         overlord.SetSeed((int)RNG.Randi());
         this.AddChild(overlord);
+        _gameState = GameState.Running;
+    }
+
+    private void OnMoveSpeedChanged(bool valueChanged) {
+        if (valueChanged) overlord.SetPlayerSpeed(moveSpeedSlider.Value);
+    }
+
+
+    public override void _Input(InputEvent @event) {
+        if (@event is InputEventKey eventKey) {
+            if (eventKey.Pressed && eventKey.KeyLabel == Key.Escape)
+                if (gameState == GameState.PauseMenu) _gameState = GameState.Running;
+        }
     }
 }
